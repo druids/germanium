@@ -1,7 +1,21 @@
-import config
+from germanium import config
+
+class AssertMixin(object):
+
+    def assert_true(self, expr, msg):
+        self.assertTrue(expr, msg)
+
+    def assert_false(self, expr, msg):
+        self.assertTrue(expr, msg)
+
+    def assert_equal(self, first, second, msg):
+        self.assertEqual(first, second, msg)
+
+    def assert_equals(self, first, second, msg):
+        self.assertEquals(first, second, msg)
 
 
-class Assert(object):
+class GerundiumAssertMixin(AssertMixin):
 
     def assert_present(self, selector, msg=None):
         return self.assertTrue(self.driver.wait_element_present(selector), msg)
@@ -10,12 +24,12 @@ class Assert(object):
         return self.assertTrue(self.driver.wait_element_present(selector, False), msg)
 
     def assert_success(self, text):
-        selector = ''.join((getattr(config, 'FLASH'), getattr(config, 'FLASH_TYPE')['success'], ' ', getattr(config, 'FLASH_WRAPPER')))
+        selector = ''.join((config.FLASH, config.FLASH_TYPE['success'], ' ', config.FLASH_WRAPPER))
         self.driver.wait_element_present(selector)
         self.assert_text(selector, text)
 
     def assert_visible_loading(self):
-        selector = ''.join((getattr(config, 'FLASH'), getattr(config, 'FLASH_TYPE')['info'], ' ', getattr(config, 'FLASH_WRAPPER')))
+        selector = ''.join((config.FLASH, config.FLASH_TYPE['info'], ' ', config.FLASH_WRAPPER))
         self.driver.wait_element_present(selector)
         self.assert_text(selector, 'Loading...')
 
@@ -32,4 +46,4 @@ class Assert(object):
         self.assertTrue(text in html, "Text does not match.\nSelector: %s\nExpected: %s\nActual: %s\n" % texts)
 
     def assert_dialog_present(self):
-        self.assert_present(getattr(config, 'MODAL_DIALOG'))
+        self.assert_present(config.MODAL_DIALOG)

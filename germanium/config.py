@@ -1,24 +1,29 @@
-from djang.conf import settings
+from django.conf import settings
 
-FLASH = '.flash'
-FLASH_TYPE = {
-    'success': '.success',
-    'info': '.info',
-    'warning': '.warn',
-    'error': '.error'
-}
-FLASH_WRAPPER = 'span'
-FLASH_ICON_CLOSE = '.goog-icon-remove'
+FLASH = getattr(settings, 'FLASH', '.flash')
+FLASH_TYPE = getattr(settings, 'FLASH_TYPE', {
+                                                'success': '.success',
+                                                'info': '.info',
+                                                'warning': '.warn',
+                                                'error': '.error'
+                                              })
+FLASH_WRAPPER = getattr(settings, 'FLASH_ICON_CLOSE', 'span')
+FLASH_ICON_CLOSE = getattr(settings, 'FLASH_ICON_CLOSE', '.goog-icon-remove')
 
-USERNAME = '#id_username'
-PASSWORD = '#id_password'
+USERNAME = getattr(settings, 'USERNAME', 'username')
+PASSWORD = getattr(settings, 'PASSWORD', 'password')
 
-BTN_SUBMIT = 'button[type="submit"]'
-BTN_SAVE = '.btn-save'
-BTN_SAVE_AND_CONTINUE = '.btn-save-and-continue'
-BTN_CANCEL = '.btn-cancel'
+BTN_SUBMIT = getattr(settings, 'BTN_SUBMIT', 'button[type="submit"]')
+BTN_SAVE = getattr(settings, 'BTN_SAVE', '.btn-save')
+BTN_SAVE_AND_CONTINUE = getattr(settings, 'BTN_SAVE_AND_CONTINUE', '.btn-save-and-continue')
+BTN_CANCEL = getattr(settings, 'BTN_CANCEL', '.btn-cancel')
 
-MODAL_DIALOG = '.modal-dialog'
+MODAL_DIALOG = getattr(settings, 'MODAL_DIALOG', '.modal-dialog')
 
-SELENIUM_TESTS_WAIT = 1
-SELENIUM_DISPLAY_DIMENSION = (1440, 900)
+SELENIUM_TESTS_WAIT = getattr(settings, 'SELENIUM_TESTS_WAIT', 1)
+SELENIUM_DISPLAY_DIMENSION = getattr(settings, 'SELENIUM_DISPLAY_DIMENSION', (1440, 900))
+
+SELENIUM_RUN_IN_BACKGROUND = getattr(settings, 'SELENIUM_RUN_IN_BACKGROUND', False)
+
+LOGOUT_URL = getattr(settings, 'LOGOUT_URL', 'logout')
+LOGIN_URL = getattr(settings, 'LOGIN_URL', 'login')

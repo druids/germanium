@@ -1,50 +1,48 @@
 import time
 
 import config
-from asserts import Assert
+
+from django.test.testcases import LiveServerTestCase
+
 from django_selenium.testcases import MyDriver
+from django.core.urlresolvers import reverse
 
 from selenium.common.exceptions import WebDriverException
-
 from selenium.webdriver.common.action_chains import ActionChains
 
-
-SELENIUM_TESTS_WAIT = config.SELENIUM_TESTS_WAIT
-
-SELENIUM_DISPLAY_DIMENSION = getattr(config, 'SELENIUM_DISPLAY_DIMENSION', (1440, 900))
-
+from germanium.auth import AuthTestCaseMixin
+from germanium.asserts import GerundiumAssertMixin
 
 class ConfigurableWaitDriver(MyDriver):
     def _wait_for_page_source(self):
         try:
             page_source = self.page_source
-            time.sleep(SELENIUM_TESTS_WAIT)
+            time.sleep(config.SELENIUM_TESTS_WAIT)
             while page_source != self.page_source:
                 page_source = self.page_source
-                time.sleep(SELENIUM_TESTS_WAIT)
+                time.sleep(config.SELENIUM_TESTS_WAIT)
             self.update_text()
         except WebDriverException:
             pass
 
 
-class GermaniumTestCase(Assert):
+class GermaniumTestCase(AuthTestCaseMixin, GerundiumAssertMixin, LiveServerTestCase):
     main_wrapper = ''
     logged_user = None
 
     @classmethod
     def setUpClass(cls):
-        if settings.SELENIUM_RUN_IN_BACKGROUND:
+        if config.SELENIUM_RUN_IN_BACKGROUND:
             from pyvirtualdisplay import Display
-            cls.display = Display(visible=0, size=SELENIUM_DISPLAY_DIMENSION)
+            cls.display = Display(visible=0, size=config.SELENIUM_DISPLAY_DIMENSION)
             cls.display.start()
 
         super(GermaniumTestCase, cls).setUpClass()
 
     def setUp(self):
         super(GermaniumTestCase, self).setUp()
-        self.email = 'test_user@test.cz'
         self.driver = ConfigurableWaitDriver()
-        self.driver.set_window_size(SELENIUM_DISPLAY_DIMENSION[0], SELENIUM_DISPLAY_DIMENSION[1])
+        self.driver.set_window_size(config.SELENIUM_DISPLAY_DIMENSION[0], config.SELENIUM_DISPLAY_DIMENSION[1])
         self.driver.live_server_url = self.live_server_url
 
     def tearDown(self):
@@ -54,35 +52,19 @@ class GermaniumTestCase(Assert):
 
     @classmethod
     def tearDownClass(cls):
-        if settings.SELENIUM_RUN_IN_BACKGROUND:
+        if config.SELENIUM_RUN_IN_BACKGROUND:
             cls.display.stop()
         super(GermaniumTestCase, cls).tearDownClass()
 
-    def get_logged_user(self, email, password, role, is_superuser):
-        return None
-
-    def login(self, email=None, password='secret_password', role=None, is_superuser=True):
-        if email is None:
-            email = self.email
-        if self.logged_user:
-            self.logout()
-
-        self.authorize(email, password)
-        self.logged_user = self.get_logged_user()
-
-    @staticmethod
-    def get_logout_url():
-        return ''
-
     def logout(self):
-        self.driver.open_url(self.get_logout_url())
+        self.driver.open_url(config.LOGOUT_URL)
         self.logged_user = None
 
-    def authorize(self, email, password):
+    def authorize(self, username, password):
         self.driver.open_url('/')
-        self.driver.type_in('input' + getattr(config, 'USERNAME'), email)
-        self.driver.type_in('input' + getattr(config, 'PASSWORD'), password)
-        self.driver.click(getattr(config, 'BTN_SUBMIT'))
+        self.driver.type_in('input#id_' + config.USERNAME, username)
+        self.driver.type_in('input#id_' + config.PASSWORD, password)
+        self.driver.click(config.BTN_SUBMIT)
 
     def css(self, selector):
         return self.driver.find(selector)
@@ -101,13 +83,13 @@ class GermaniumTestCase(Assert):
         el.send_keys(text)
 
     def save(self):
-        self.css(getattr(config, 'BTN_SAVE')).click()
+        self.css(config.BTN_SAVE).click()
 
     def save_and_continue(self):
-        self.css(getattr(config, 'BTN_SAVE_AND_CONTINUE')).click()
+        self.css(config.BTN_SAVE_AND_CONTINUE).click()
 
     def cancel(self):
-        self.css(getattr(config, 'BTN_CANCEL')).click()
+        self.css(config.BTN_CANCEL).click()
 
     def drag_and_drop(self, source, target):
         return ActionChains(self.driver).drag_and_drop(source, target)
@@ -116,7 +98,7 @@ class GermaniumTestCase(Assert):
         return self.css(selector).get_attribute(attr)
 
     def close_flash(self, type):
-        selector = ''.join((getattr(config, 'FLASH'), type, ' ', getattr(config, 'FLASH_ICON_CLOSE')))
+        selector = ''.join((config.FLASH, type, ' ', config.FLASH_ICON_CLOSE))
         self.driver.wait_element_present(selector)
         self.css(selector).click()
 
