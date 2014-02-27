@@ -5,13 +5,13 @@ import config
 from django.test.testcases import LiveServerTestCase
 
 from django_selenium.testcases import MyDriver
-from django.core.urlresolvers import reverse
 
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 
 from germanium.auth import AuthTestCaseMixin
 from germanium.asserts import GerundiumAssertMixin
+
 
 class ConfigurableWaitDriver(MyDriver):
     def _wait_for_page_source(self):

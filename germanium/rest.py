@@ -1,8 +1,10 @@
 import json
 
 from django.utils.encoding import force_text
+from django.test.client import MULTIPART_CONTENT
 
 from germanium.client import ClientTestCase
+from germanium import config
 
 
 class RESTTestCase(ClientTestCase):
@@ -11,13 +13,18 @@ class RESTTestCase(ClientTestCase):
         super(RESTTestCase, self).setUp()
         self.serializer = json
 
+    def authorize(self, username, password):
+        self.assert_http_redirect(self.post(config.LOGIN_URL, {config.USERNAME: username,
+                                                               config.PASSWORD: password},
+                                            content_type=MULTIPART_CONTENT))
+
     def put(self, url, data={}, content_type='application/json'):
-        return self.c.put(url, data=data, content_type=content_type)
+        return self.c.put(url, data=data, content_type=content_type, **self.default_headers)
 
     def post(self, url, data, content_type='application/json'):
-        return self.c.post(url, data=data, content_type=content_type)
+        return self.c.post(url, data=data, content_type=content_type, **self.default_headers)
 
-    def assert_valid_JSON(self, data):
+    def assert_valid_JSON(self, data, msg='Json is not valid'):
         """
         Given the provided ``data`` as a string, ensures that it is valid JSON &
         can be loaded properly.
@@ -25,9 +32,9 @@ class RESTTestCase(ClientTestCase):
         try:
             self.serializer.loads(data)
         except:
-            self.fail('Json is not valid')
+            self.fail(msg)
 
-    def assert_alid_JSON_response(self, resp):
+    def assert_valid_JSON_response(self, resp, msg=None):
         """
         Given a ``HttpResponse`` coming back from using the ``client``, assert that
         you get back:
@@ -36,11 +43,11 @@ class RESTTestCase(ClientTestCase):
         * The correct content-type (``application/json``)
         * The content is valid JSON
         """
-        self.assert_http_ok(resp)
-        self.assertTrue(resp['Content-Type'].startswith('application/json'))
-        self.assert_valid_JSON(force_text(resp.content))
+        self.assert_http_ok(resp, msg)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'), msg)
+        self.assert_valid_JSON(force_text(resp.content), msg)
 
-    def assert_valid_JSON_created_response(self, resp):
+    def assert_valid_JSON_created_response(self, resp, msg=None):
         """
         Given a ``HttpResponse`` coming back from using the ``client``, assert that
         you get back:
@@ -49,9 +56,9 @@ class RESTTestCase(ClientTestCase):
         * The correct content-type (``application/json``)
         * The content is valid JSON
         """
-        self.assert_http_created(resp)
-        self.assertTrue(resp['Content-Type'].startswith('application/json'))
-        self.assert_valid_JSON(force_text(resp.content))
+        self.assert_http_created(resp, msg)
+        self.assertTrue(resp['Content-Type'].startswith('application/json'), msg)
+        self.assert_valid_JSON(force_text(resp.content), msg)
 
     def deserialize(self, resp):
         """
