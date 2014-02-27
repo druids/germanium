@@ -1,4 +1,4 @@
-from germanium import GermaniumTestCase
+from germanium.germanium_selenium import GermaniumTestCase
 
 
 class AsSuperuserTestCase(GermaniumTestCase):

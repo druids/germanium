@@ -1,6 +1,6 @@
 import time
 
-import config
+from germanium import config
 
 from django.test.testcases import LiveServerTestCase
 
