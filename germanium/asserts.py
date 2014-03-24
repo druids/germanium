@@ -15,7 +15,7 @@ class AssertMixin(object):
         self.assertEquals(first, second, msg)
 
 
-class GerundiumAssertMixin(AssertMixin):
+class GermaniumAssertMixin(AssertMixin):
 
     def assert_present(self, selector, msg=None):
         return self.assertTrue(self.driver.wait_element_present(selector), msg)

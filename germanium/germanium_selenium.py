@@ -10,7 +10,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 
 from germanium.auth import AuthTestCaseMixin
-from germanium.asserts import GerundiumAssertMixin
+from germanium.asserts import GermaniumAssertMixin
 
 
 class ConfigurableWaitDriver(MyDriver):
@@ -26,7 +26,7 @@ class ConfigurableWaitDriver(MyDriver):
             pass
 
 
-class GermaniumTestCase(AuthTestCaseMixin, GerundiumAssertMixin, LiveServerTestCase):
+class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestCase):
     main_wrapper = ''
     logged_user = None
 
