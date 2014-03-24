@@ -6,10 +6,10 @@ from django.test.client import RequestFactory
 
 from germanium.auth import AuthTestCaseMixin
 from germanium import config
+from germanium.asserts import AssertMixin
 
 
-
-class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase):
+class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
 
     logger = logging.getLogger('tests')
 
@@ -46,13 +46,13 @@ class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase):
         return resp
 
     def assert_http_ok(self, resp, msg=None):
-        return self.assertEqual(resp.status_code, 200, msg)
+        return self.assert_equal(resp.status_code, 200, msg)
 
     def assert_http_created(self, resp, msg=None):
-        return self.assertEqual(resp.status_code, 201, msg)
+        return self.assert_equal(resp.status_code, 201, msg)
 
     def assert_http_accepted(self, resp, msg=None):
-        return self.assertIn(resp.status_code, [202, 204], msg)
+        return self.assert_in(resp.status_code, [202, 204], msg)
 
     def assert_http_multiple_choices(self, resp, msg=None):
         return self.assertEqual(resp.status_code, 300, msg)

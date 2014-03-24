@@ -5,9 +5,10 @@ from django.test.client import MULTIPART_CONTENT
 
 from germanium.client import ClientTestCase
 from germanium import config
+from germanium.asserts import AssertMixin
 
 
-class RESTTestCase(ClientTestCase):
+class RESTTestCase(ClientTestCase, AssertMixin):
 
     def setUp(self):
         super(RESTTestCase, self).setUp()
@@ -44,7 +45,7 @@ class RESTTestCase(ClientTestCase):
         * The content is valid JSON
         """
         self.assert_http_ok(resp, msg)
-        self.assertTrue(resp['Content-Type'].startswith('application/json'), msg)
+        self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
         self.assert_valid_JSON(force_text(resp.content), msg)
 
     def assert_valid_JSON_created_response(self, resp, msg=None):
@@ -57,7 +58,7 @@ class RESTTestCase(ClientTestCase):
         * The content is valid JSON
         """
         self.assert_http_created(resp, msg)
-        self.assertTrue(resp['Content-Type'].startswith('application/json'), msg)
+        self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
         self.assert_valid_JSON(force_text(resp.content), msg)
 
     def deserialize(self, resp):
@@ -83,4 +84,4 @@ class RESTTestCase(ClientTestCase):
         a response match up to what is expected. This is typically less fragile than
         testing the full structure, which can be prone to data changes.
         """
-        self.assertEqual(sorted(data.keys()), sorted(expected))
+        self.assert_equal(sorted(data.keys()), sorted(expected))
