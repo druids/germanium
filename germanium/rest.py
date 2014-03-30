@@ -1,5 +1,6 @@
 import json
 
+from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.encoding import force_text
 from django.test.client import MULTIPART_CONTENT
 
@@ -66,14 +67,14 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         Given a ``HttpResponse`` coming back from using the ``client``, this method
         return dict of deserialized json string
         """
-        return self.serializer.loads(resp.content)
+        return json.loads(resp.content)
 
     def serialize(self, data):
         """
         Given a Python datastructure (typically a ``dict``) & a desired  json,
         this method will return a serialized string of that data.
         """
-        return self.serializer.dumps(data)
+        return json.dumps(data, cls=DjangoJSONEncoder)
 
     def assert_keys(self, data, expected):
         """
