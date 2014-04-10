@@ -25,7 +25,7 @@ SELENIUM_DISPLAY_DIMENSION = getattr(settings, 'SELENIUM_DISPLAY_DIMENSION', (14
 
 SELENIUM_RUN_IN_BACKGROUND = getattr(settings, 'SELENIUM_RUN_IN_BACKGROUND', False)
 
-LOGOUT_URL = getattr(settings, 'LOGOUT_URL', 'logout')
-LOGIN_URL = getattr(settings, 'LOGIN_URL', 'login')
+LOGOUT_URL = getattr(settings, 'LOGOUT_URL', '/logout')
+LOGIN_URL = getattr(settings, 'LOGIN_URL', '/login')
 
 PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN', 'phantomjs')

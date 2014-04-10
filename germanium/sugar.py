@@ -71,7 +71,7 @@ class CSSMixin(object):
     def click(self, selector_or_element):
         self._get_element_from_selector(selector_or_element).click()
 
-    def click_and_wait(self, selector_or_element, timeout=3):
+    def click_and_wait(self, selector_or_element, timeout=1):
         self._get_element_from_selector(selector_or_element).click()
         time.sleep(timeout)
 
