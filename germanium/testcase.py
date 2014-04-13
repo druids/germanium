@@ -3,7 +3,8 @@ import time
 from django.test.testcases import LiveServerTestCase
 from django.conf import settings
 
-from django_selenium.testcases import MyDriver
+from django_selenium.testcases import MyDriver, wait
+from django_selenium import settings as selenium_settings
 
 from selenium import webdriver
 
@@ -12,12 +13,24 @@ from germanium.auth import AuthTestCaseMixin
 from germanium.asserts import GermaniumAssertMixin
 
 from selenium.common.exceptions import WebDriverException
-
+from germanium.patch import patch_broken_pipe_error
 
 SELENIUM_TESTS_WAIT = getattr(settings, 'SELENIUM_TESTS_WAIT', 0.1)
+PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN')
 
 
 class ConfigurableWaitDriver(MyDriver):
+
+    def __init__(self):
+        driver = getattr(webdriver, selenium_settings.SELENIUM_DRIVER, None)
+        assert driver, "settings.SELENIUM_DRIVER contains non-existing driver"
+        if driver is webdriver.PhantomJS and PHANTOM_JS_BIN:
+            self.driver = driver(settings.PHANTOM_JS_BIN)
+            self.live_server_url = 'http://%s:%s' % (selenium_settings.SELENIUM_TESTSERVER_HOST ,
+                                                     str(selenium_settings.SELENIUM_TESTSERVER_PORT))
+            self.text = ''
+        else:
+            super(ConfigurableWaitDriver, self).__init__()
 
     def _wait_for_page_source(self):
         try:
@@ -34,7 +47,6 @@ class ConfigurableWaitDriver(MyDriver):
 class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestCase):
 
     is_logged = False
-    app_path = ''
 
     @classmethod
     def setUpClass(cls):
@@ -42,6 +54,7 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
 
     @classmethod
     def set_up_class(cls):
+        patch_broken_pipe_error()
         super(GermaniumTestCase, cls).setUpClass()
 
     def setUp(self):
@@ -58,6 +71,7 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
 
     def tear_down(self):
         self.driver.quit()
+        time.sleep(0.2)
 
     @classmethod
     def tearDownClass(cls):
@@ -67,19 +81,8 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
     def tear_down_class(cls):
         super(GermaniumTestCase, cls).tearDownClass()
 
-    def open(self, url):
-        self.driver.get("%s%s" % (self.live_server_url, url))
-
-    def open_and_wait(self, url, timeout=1):
-        self.driver.get("%s%s" % (self.live_server_url, url))
-        time.sleep(timeout)
-
-    def go(self, url=''):
-        self.open(self.app_path + url)
-
-    def go_and_wait(self, url='', timeout=1):
-        print self.app_path + url
-        self.open_and_wait(self.app_path + url, timeout)
+    def open(self, url=''):
+        self.driver.open_url(url)
 
     def logout(self):
         self.open(config.LOGOUT_URL)
@@ -91,4 +94,3 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
         self.type('input#id_' + config.PASSWORD, password)
         self.click(config.BTN_SUBMIT)
         time.sleep(1)
-
