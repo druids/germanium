@@ -8,7 +8,7 @@ class AssertMixin(object):
         self.assertTrue(expr, msg)
 
     def assert_false(self, expr, msg=None):
-        self.assertTrue(expr, msg)
+        self.assertFalse(expr, msg)
 
     def assert_equal(self, first, second, msg=None):
         self.assertEqual(first, second, msg)
@@ -79,3 +79,11 @@ class GermaniumAssertMixin(AssertMixin, CSSMixin):
 
     def assert_dialog_present(self):
         self.assert_present(config.MODAL_DIALOG)
+
+    def assert_current_path(self, path, msg=None):
+        splitted_url = self.driver.current_url.split('/', 3)
+        current_path = ''
+        if len(splitted_url) == 4:
+            current_path = '/' + splitted_url[3].split('?')[0].split('#')[0]
+
+        self.assert_equal(path, current_path, msg)

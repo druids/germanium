@@ -1,3 +1,6 @@
+import collections
+import six
+
 from django.utils.unittest.compatibility import wraps
 
 
@@ -28,13 +31,21 @@ def login_all(cls=None, **user_kwargs):
     return _login_all
 
 
-def data_provider(fn_data_provider):
+def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_kwargs):
     """Data provider decorator, allows another callable to provide the data for the test"""
     def test_decorator(fn):
         def repl(self, *args):
-            for i in fn_data_provider(self):
+            if isinstance(fn_data_provider_or_str, six.string_types):
+                data = getattr(self, fn_data_provider_or_str)(*data_provider_args, **data_provider_kwargs)
+            else:
+                data = fn_data_provider_or_str(self, *data_provider_args, **data_provider_kwargs)
+
+            for i in data:
                 try:
-                    fn(self, *i)
+                    if isinstance(i, collections.Iterable):
+                        fn(self, *i)
+                    else:
+                        fn(self, i)
                 except AssertionError:
                     print "Assertion error caught with data set ", i
                     raise
