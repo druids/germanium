@@ -71,7 +71,7 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
 
     def tear_down(self):
         self.driver.quit()
-        time.sleep(1)
+        time.sleep(2)
 
     @classmethod
     def tearDownClass(cls):

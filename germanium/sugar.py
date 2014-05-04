@@ -7,6 +7,7 @@ from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
 
 from django_selenium.testcases import wait, SeleniumElement
+import six
 
 
 class CSSMixin(object):
@@ -14,6 +15,9 @@ class CSSMixin(object):
 
     def css(self, selector):
         return SeleniumElement(self.driver.find_elements_by_css_selector(selector), selector)
+
+    def xpath(self, selector):
+        return SeleniumElement(self.driver.find_elements_by_xpath(selector), selector)
 
     def css_in(self, selector):
         return self.css(' '.join((self.main_wrapper, selector)))
@@ -27,10 +31,10 @@ class CSSMixin(object):
             el.clear()
         el.send_keys(text)
 
-    def type_with_return(self, selector_or_element, text, clear=True):
-        self.type(selector_or_element, text, clear)
-        time.sleep(0.2)
-        self.type(selector_or_element, Keys.RETURN, False)
+    def type_with_autocomplete(self, selector_or_element, text):
+        self.type(selector_or_element + ' input', text)
+        time.sleep(0.5)
+        self.click(selector_or_element + ' li.ac-row.active')
 
     def save(self, wait_for_element=None):
         self.css(config.BTN_SAVE).click()
@@ -60,7 +64,7 @@ class CSSMixin(object):
         self.css(' '.join((config.MODAL_DIALOG, config.BTN_SAVE))).click()
 
     def _get_element_from_selector(self, selector_or_el):
-        if not isinstance(selector_or_el, SeleniumElement):
+        if isinstance(selector_or_el, six.string_types):
             selector_or_el = self.css(selector_or_el)
         return selector_or_el
 
@@ -91,4 +95,8 @@ class CSSMixin(object):
         time.sleep(timeout)
 
     def select(self, selector, val):
-        self.click(selector + (' option[value="%s"]' % val))
+        element = self._get_element_from_selector(selector)
+        if element.tag_name == 'input':
+            self.click(selector + '[value="%s"]' % val)
+        elif element.tag_name == 'select':
+            self.click(selector + (' option[value="%s"]' % val))
