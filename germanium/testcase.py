@@ -64,6 +64,7 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
     def set_up(self):
         self.driver = ConfigurableWaitDriver()
         self.driver.live_server_url = self.live_server_url
+        self.driver.set_window_size(*config.WINDOW_SIZE)
 
     def tearDown(self):
         self.tear_down()
