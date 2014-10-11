@@ -29,3 +29,4 @@ LOGOUT_URL = getattr(settings, 'LOGOUT_URL', '/logout')
 LOGIN_URL = getattr(settings, 'LOGIN_URL', '/login')
 
 PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN', 'phantomjs')
+WINDOW_SIZE = (1124, 850)
