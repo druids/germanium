@@ -31,18 +31,42 @@ class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
         resp = self.post(config.LOGIN_URL, {config.USERNAME: username, config.PASSWORD: password})
         self.assert_http_redirect(resp)
 
-    def get(self, url):
-        resp = self.c.get(url, **self.default_headers)
+    def get(self, url, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        resp = self.c.get(url, **headers)
         return resp
 
-    def put(self, url, data={}):
-        return self.c.put(url, data, **self.default_headers)
+    def put(self, url, data={}, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
 
-    def post(self, url, data):
-        return self.c.post(url, data, **self.default_headers)
+        return self.c.put(url, data, **self.headers)
 
-    def delete(self, url):
-        resp = self.c.delete(url, **self.default_headers)
+    def post(self, url, data, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        return self.c.post(url, data, **headers)
+
+    def head(self, url, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        return self.c.head(url, **headers)
+
+    def options(self, url, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        return self.c.options(url, **headers)
+
+    def delete(self, url, headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        resp = self.c.delete(url, **headers)
         return resp
 
     def assert_http_ok(self, resp, msg=None):

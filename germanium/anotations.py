@@ -1,3 +1,5 @@
+from six import string_types
+
 from django.utils.unittest.compatibility import wraps
 
 
@@ -31,8 +33,15 @@ def login_all(cls=None, **user_kwargs):
 def data_provider(fn_data_provider):
     """Data provider decorator, allows another callable to provide the data for the test"""
     def test_decorator(fn):
+
+        def get_data(self):
+            if isinstance(fn_data_provider, string_types):
+                return getattr(self, fn_data_provider)()
+            else:
+                return fn_data_provider(self)
+
         def repl(self, *args):
-            for i in fn_data_provider(self):
+            for i in get_data(self):
                 try:
                     fn(self, *i)
                 except AssertionError:
