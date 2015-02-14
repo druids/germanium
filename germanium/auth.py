@@ -12,7 +12,7 @@ class AuthTestCaseMixin(object):
     logged_user = None
 
     def get_user(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def login(self, user):
         if self.logged_user:
@@ -22,7 +22,7 @@ class AuthTestCaseMixin(object):
         self.logged_user = user
 
     def authorize(self, username, password):
-        raise NotImplemented
+        raise NotImplementedError
 
     def logout(self):
-        raise NotImplemented
+        raise NotImplementedError

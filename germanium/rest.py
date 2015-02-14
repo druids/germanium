@@ -13,18 +13,23 @@ class RESTTestCase(ClientTestCase, AssertMixin):
 
     def setUp(self):
         super(RESTTestCase, self).setUp()
-        self.serializer = json
 
     def authorize(self, username, password):
         self.assert_http_redirect(self.post(config.LOGIN_URL, {config.USERNAME: username,
                                                                config.PASSWORD: password},
                                             content_type=MULTIPART_CONTENT))
 
-    def put(self, url, data={}, content_type='application/json'):
-        return self.c.put(url, data=data, content_type=content_type, **self.default_headers)
+    def put(self, url, data={}, content_type='application/json', headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
 
-    def post(self, url, data, content_type='application/json'):
-        return self.c.post(url, data=data, content_type=content_type, **self.default_headers)
+        return self.c.put(url, data=data, content_type=content_type, **headers)
+
+    def post(self, url, data, content_type='application/json', headers=None):
+        headers = headers or {}
+        headers.update(self.default_headers)
+
+        return self.c.post(url, data=data, content_type=content_type, **headers)
 
     def assert_valid_JSON(self, data, msg='Json is not valid'):
         """
@@ -32,7 +37,7 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         can be loaded properly.
         """
         try:
-            self.serializer.loads(data)
+            json.loads(data)
         except:
             self.fail(msg)
 

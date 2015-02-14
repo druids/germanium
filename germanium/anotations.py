@@ -46,13 +46,15 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
     """Data provider decorator, allows another callable to provide the data for the test"""
 
     def test_decorator(fn):
-        def repl(self, *args):
-            if isinstance(fn_data_provider_or_str, six.string_types):
-                data = getattr(self, fn_data_provider_or_str)(*data_provider_args, **data_provider_kwargs)
-            else:
-                data = fn_data_provider_or_str(self, *data_provider_args, **data_provider_kwargs)
 
-            for i in data:
+        def get_data(self):
+            if isinstance(fn_data_provider_or_str, six.string_types):
+                return getattr(self, fn_data_provider_or_str)()
+            else:
+                return fn_data_provider_or_str(self)
+
+        def repl(self, *args):
+            for i in get_data(self):
                 try:
                     if isinstance(i, collections.Iterable):
                         fn(self, *i)
