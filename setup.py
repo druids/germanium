@@ -19,6 +19,8 @@ setup(
         'django-selenium>=0.9.6',
         'PyVirtualDisplay>=0.1.2',
         'selenium>=2.37.2',
+        'nose>=1.3.4',
+        'django-nose>=1.3'
     ],
     include_package_data=True,
     zip_safe=False,
