@@ -4,13 +4,23 @@ import six
 from django.utils.unittest.compatibility import wraps
 
 
-def login(function=None, **user_kwargs):
+def login(function=None, users_generator='get_user', **users_kwargs):
     """Login decorator usage: @login(user_data)"""
+
     def _login(function):
         def _decorator(self, *args, **kwargs):
-            user = self.get_user(**user_kwargs)
-            self.login(user)
-            return function(self, *args, **kwargs)
+            if isinstance(users_generator, six.string_types):
+                users = getattr(self, users_generator)(**users_kwargs)
+            else:
+                users = users_generator(self, **users_kwargs)
+
+            if not isinstance(users, (list, tuple)):
+                users = (users,)
+
+            for user in users:
+                self.login(user)
+                function(self, *args, **kwargs)
+                self.logout()
         return wraps(function)(_decorator)
 
     if function:
@@ -20,6 +30,7 @@ def login(function=None, **user_kwargs):
 
 def login_all(cls=None, **user_kwargs):
     """Login decorator for all methods inside test usage: @login(user_data)"""
+
     def _login_all(cls):
         for attr, val in cls.__dict__.iteritems():
             if callable(val) and attr.startswith("test_"):
@@ -33,6 +44,7 @@ def login_all(cls=None, **user_kwargs):
 
 def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_kwargs):
     """Data provider decorator, allows another callable to provide the data for the test"""
+
     def test_decorator(fn):
         def repl(self, *args):
             if isinstance(fn_data_provider_or_str, six.string_types):
