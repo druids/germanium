@@ -1,7 +1,9 @@
 import logging
 import urlparse
+import six
 
 from HTMLParser import HTMLParseError, HTMLParser
+
 from django.conf import settings
 
 
@@ -37,11 +39,42 @@ class HtmlLinkExtractor(LinkExtractor):
         return parser.links
 
 
+class UrlWithReferer(object):
+
+    def __init__(self, url, referer=None):
+        self.url = url
+        self.referer = referer
+
+    def __eq__(self, other):
+        if isinstance(other, UrlWithReferer):
+            return self.url == other.url
+        if isinstance(object, six.string_types):
+            return self.url == other
+        return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __str__(self):
+        return self.url
+
+    def __hash__(self):
+        return hash(self.url)
+
+    def __unicode__(self):
+        return self.url
+
+
 class Crawler(object):
 
-    def __init__(self, client, base_urls=None, exclude_urls=None, pre_request=None, post_response=None, extra_link_extractors=None):
+    def __init__(self, client, base_urls=None, exclude_urls=None, pre_request=None, post_response=None,
+                 extra_link_extractors=None):
         self.client = client
-        self.urls = set(base_urls or ())
+        self.urls = set()
+        if base_urls:
+            for url in base_urls:
+                self.urls.add(UrlWithReferer(url))
+
         self.crawled_urls = set(exclude_urls or ())
         self.pre_request = pre_request
         self.post_response = post_response
@@ -51,8 +84,7 @@ class Crawler(object):
 
     def run(self):
         while self.urls:
-            url = self.urls.pop()
-            self._call_request(url)
+            self._call_request(self.urls.pop())
 
     def _parse_urls(self, url, resp):
         content = resp.content
@@ -84,30 +116,31 @@ class Crawler(object):
 
         return returned_urls
 
-    def _pre_request(self, url, headers):
+    def _pre_request(self, url, referer, headers):
         if self.pre_request:
-            self.pre_request(url, headers)
+            self.pre_request(url, referer, headers)
 
         return url, headers
 
-    def _post_response(self, url, resp, exception=None):
+    def _post_response(self, url, referer, resp, exception=None):
         if self.post_response:
-            self.post_response(url, resp, exception)
+            self.post_response(url, referer, resp, exception)
 
-    def _call_request(self, url):
+    def _call_request(self, url_with_referer):
+        url, referer = url_with_referer.url, url_with_referer.referer
         try:
-            url, headers = self._pre_request(url, {})
+            url, headers = self._pre_request(url, referer, {})
             resp = self.client.get(url, follow=True, **headers)
             self.crawled_urls.add(url)
             if resp.redirect_chain:
                 self.crawled_urls.update((redirect_url for redirect_url, _ in resp.redirect_chain))
             for parsed_url in self._parse_urls(url, resp):
                 if parsed_url not in self.crawled_urls and parsed_url not in self.urls:
-                    self.urls.add(parsed_url)
+                    self.urls.add(UrlWithReferer(parsed_url, url))
             e = None
         except HTMLParseError, e:
             LOG.error('%s: unable to parse invalid HTML: %s', url, e)
         except Exception, e:
             LOG.exception('%s had unhandled exception: %s', url, e)
 
-        self._post_response(url, resp, e)
+        self._post_response(url, referer, resp, e)
