@@ -61,7 +61,6 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
                     else:
                         fn(self, i)
                 except AssertionError:
-                    print "Assertion error caught with data set ", i
                     raise
-        return repl
+        return wraps(fn)(repl)
     return test_decorator
