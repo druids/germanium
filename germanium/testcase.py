@@ -1,6 +1,7 @@
 import time
+import types
 
-from django.test.testcases import LiveServerTestCase
+from django.test.testcases import LiveServerTestCase, TestCase
 from django.conf import settings
 
 from django_selenium.testcases import MyDriver, wait
@@ -95,3 +96,28 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
         self.type('input#id_' + config.PASSWORD, password)
         self.click(config.BTN_SUBMIT)
         time.sleep(1)
+
+
+def change_and_save(self, **kwargs):
+    for attr, val in kwargs.items():
+        setattr(self, attr, val)
+    self.save()
+
+
+class ModelTestCase(TestCase):
+
+    factory_class = None
+
+    def inst_data_provider(self, **inst_kwargs):
+        if 'pk' in inst_kwargs:
+            inst = self.factory_class._get_model_class().objects.get(pk=inst_kwargs.get('pk'))
+        else:
+            inst = self.factory_class(**inst_kwargs)
+        inst.change_and_save = types.MethodType(change_and_save, inst)
+        return inst
+
+    def insts_data_provider(self, count=10, **inst_kwargs):
+        insts = []
+        for _ in range(count):
+            insts.append(self.inst_data_provider(**inst_kwargs))
+        return insts
