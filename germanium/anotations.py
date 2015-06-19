@@ -2,6 +2,7 @@ import collections
 import six
 
 from django.utils.unittest.compatibility import wraps
+from django.db.models.fields import DateField, DateTimeField
 
 
 def login(function=None, users_generator='get_user', **users_kwargs):
@@ -67,3 +68,20 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
                     raise
         return wraps(fn)(repl)
     return test_decorator
+
+
+def turn_off_auto_now(model_class, field_name):
+
+    def _turn_off_auto_now(function):
+        def _decorator(self, *args, **kwargs):
+                field = model_class._meta.get_field(field_name)
+                if not isinstance(field, (DateField, DateTimeField)):
+                    raise RuntimeError('Field %s must be DateField or DateTimeField type') % field_name
+                if not field.auto_now:
+                    raise RuntimeError('Field %s must have set auto_no to True') % field_name
+                field.auto_now = False
+                function(self, *args, **kwargs)
+                field.auto_now = True
+        return wraps(function)(_decorator)
+
+    return _turn_off_auto_now
