@@ -104,6 +104,12 @@ def change_and_save(self, **kwargs):
     self.save()
 
 
+def reload(self):
+    if self.pk:
+        self = self.__class__.objects.get(pk=self.pk)
+    return self
+
+
 class ModelTestCase(TestCase):
 
     factory_class = None
@@ -115,6 +121,7 @@ class ModelTestCase(TestCase):
         else:
             inst = factory_class(**inst_kwargs)
         inst.change_and_save = types.MethodType(change_and_save, inst)
+        inst.reload = types.MethodType(reload, inst)
         return inst
 
     def insts_data_provider(self, count=10, **inst_kwargs):
