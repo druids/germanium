@@ -107,6 +107,8 @@ def change_and_save(self, **kwargs):
 def reload(self):
     if self.pk:
         self = self.__class__.objects.get(pk=self.pk)
+    self.change_and_save = types.MethodType(change_and_save, self)
+    self.reload = types.MethodType(reload, self)
     return self
 
 

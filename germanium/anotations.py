@@ -1,7 +1,9 @@
 import collections
+
 import six
 
-from django.utils.unittest.compatibility import wraps
+from functools import wraps
+
 from django.db.models.fields import DateField, DateTimeField
 
 
