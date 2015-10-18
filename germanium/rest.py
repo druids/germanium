@@ -72,7 +72,7 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         Given a ``HttpResponse`` coming back from using the ``client``, this method
         return dict of deserialized json string
         """
-        return json.loads(resp.content)
+        return json.loads(resp.content.decode('utf-8'))
 
     def serialize(self, data):
         """
