@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 from germanium import config
 from germanium.sugar import CSSMixin
 

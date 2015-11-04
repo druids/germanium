@@ -1,9 +1,12 @@
+from __future__ import unicode_literals
+
+
 def patch_broken_pipe_error():
     """Monkey Patch BaseServer.handle_error to not write
     a stacktrace to stderr on broken pipe.
     http://stackoverflow.com/a/22618740/362702"""
     import sys
-    from SocketServer import BaseServer
+    from six.moves.socketserver import BaseServer
     from wsgiref import handlers
 
     handle_error = BaseServer.handle_error

@@ -1,10 +1,12 @@
+from __future__ import unicode_literals
+
 import time
 import types
 
 from django.test.testcases import LiveServerTestCase, TestCase
 from django.conf import settings
 
-from django_selenium.testcases import MyDriver, wait
+from django_selenium.testcases import MyDriver
 from django_selenium import settings as selenium_settings
 
 from selenium import webdriver
@@ -27,7 +29,7 @@ class ConfigurableWaitDriver(MyDriver):
         assert driver, "settings.SELENIUM_DRIVER contains non-existing driver"
         if driver is webdriver.PhantomJS and PHANTOM_JS_BIN:
             self.driver = driver(settings.PHANTOM_JS_BIN)
-            self.live_server_url = 'http://%s:%s' % (selenium_settings.SELENIUM_TESTSERVER_HOST ,
+            self.live_server_url = 'http://%s:%s' % (selenium_settings.SELENIUM_TESTSERVER_HOST,
                                                      str(selenium_settings.SELENIUM_TESTSERVER_PORT))
             self.text = ''
         else:
