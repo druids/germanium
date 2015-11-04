@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import collections
 
 import six
@@ -35,7 +37,7 @@ def login_all(cls=None, **user_kwargs):
     """Login decorator for all methods inside test usage: @login(user_data)"""
 
     def _login_all(cls):
-        for attr, val in cls.__dict__.iteritems():
+        for attr, val in cls.__dict__.items():
             if callable(val) and attr.startswith("test_"):
                 setattr(cls, attr, login(**user_kwargs)(val))
         return cls

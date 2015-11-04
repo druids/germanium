@@ -1,10 +1,10 @@
+from __future__ import unicode_literals
+
 import time
 
 from germanium import config
 
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.common.exceptions import WebDriverException
-from selenium.webdriver.common.keys import Keys
 
 from django_selenium.testcases import wait, SeleniumElement
 import six

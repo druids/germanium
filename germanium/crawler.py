@@ -1,8 +1,10 @@
-import logging
-import urlparse
-import six
+from __future__ import unicode_literals
 
-from HTMLParser import HTMLParseError, HTMLParser
+import logging
+import six
+import six.moves.urllib.parse
+
+from six.moves.html_parser import HTMLParser
 
 from django.conf import settings
 
@@ -10,7 +12,7 @@ from django.conf import settings
 LOG = logging.getLogger('tests')
 
 
-class LinkExtractor():
+class LinkExtractor(object):
 
     def extract(self, content):
         raise NotImplementedError
@@ -19,7 +21,6 @@ class LinkExtractor():
 class HtmlLinkExtractor(LinkExtractor):
 
     link_attr_names = ('href', 'src')
-
 
     def extract(self, content):
         link_attr_names = self.link_attr_names
@@ -30,7 +31,7 @@ class HtmlLinkExtractor(LinkExtractor):
             def handle_starttag(self, tag, attrs):
                 self.links.update(
                     v for k, v in attrs if k in link_attr_names
-            )
+                )
 
         parser = SaxLinkExtractor()
         parser.feed(content)
@@ -94,7 +95,7 @@ class Crawler(object):
         returned_urls = []
 
         for link in self.link_extractors.get(resp['Content-Type'], self.link_extractors['default']).extract(content):
-            parsed_href = urlparse.urlparse(link)
+            parsed_href = urllib.parse.urlparse(link)
 
             if not parsed_href.path:
                 continue
@@ -112,7 +113,7 @@ class Crawler(object):
                 returned_urls.append(link)
             else:
                 # We'll use urlparse's urljoin since that handles things like <a href="../foo">
-                returned_urls.append(urlparse.urljoin(url, link))
+                returned_urls.append(urllib.parse.urljoin(url, link))
 
         return returned_urls
 
@@ -138,9 +139,7 @@ class Crawler(object):
                 if parsed_url not in self.crawled_urls and parsed_url not in self.urls:
                     self.urls.add(UrlWithReferer(parsed_url, url))
             e = None
-        except HTMLParseError, e:
-            LOG.error('%s: unable to parse invalid HTML: %s', url, e)
-        except Exception, e:
+        except Exception as e:
             LOG.exception('%s had unhandled exception: %s', url, e)
 
         self._post_response(url, referer, resp, e)
