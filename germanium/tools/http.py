@@ -96,3 +96,9 @@ def assert_http_not_implemented(resp, msg=None):
     Ensures the response is returning a HTTP 501.
     """
     return gt.assert_equal(resp.status_code, 501, msg)
+    
+def assert_http_service_unavailable(resp, msg=None):
+    """
+    Ensures the response is returning a HTTP 503.
+    """
+    return gt.assert_equal(resp.status_code, 503, msg)
