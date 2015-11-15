@@ -7,6 +7,7 @@ import six
 from functools import wraps
 
 from django.db.models.fields import DateField, DateTimeField
+from django.db import transaction
 
 
 def login(function=None, users_generator='get_user', **users_kwargs):
@@ -60,9 +61,10 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
 
         def repl(self, *args):
             data = get_data(self)
-            if not isinstance(data, collections.Iterable):
+            if not isinstance(data, collections .Iterable):
                 data = (data,)
             for i in data:
+                sid = transaction.savepoint()
                 try:
                     if isinstance(i, collections.Iterable):
                         fn(self, *i)
@@ -70,6 +72,8 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
                         fn(self, i)
                 except AssertionError:
                     raise
+                finally:
+                    transaction.savepoint_rollback(sid)
         return wraps(fn)(repl)
     return test_decorator
 
