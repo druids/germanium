@@ -71,97 +71,132 @@ class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
         resp = self.c.delete(url, **headers)
         return resp
 
-    def assert_http_ok(self, resp, msg=None):
+    def assert_http_ok(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         return self.assert_equal(resp.status_code, 200, msg)
 
-    def assert_http_created(self, resp, msg=None):
+    def assert_http_created(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         return self.assert_equal(resp.status_code, 201, msg)
 
-    def assert_http_accepted(self, resp, msg=None):
+    def assert_http_accepted(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         return self.assert_in(resp.status_code, [202, 204], msg)
 
-    def assert_http_multiple_choices(self, resp, msg=None):
+    def assert_http_multiple_choices(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         return self.assertEqual(resp.status_code, 300, msg)
 
-    def assert_http_redirect(self, resp, msg=None):
+    def assert_http_redirect(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 302.
         """
         return self.assertEqual(resp.status_code, 302, msg)
 
-    def assert_http_see_other(self, resp, msg=None):
+    def assert_http_see_other(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 303.
         """
         return self.assertEqual(resp.status_code, 303, msg)
 
-    def assert_http_not_modified(self, resp, msg=None):
+    def assert_http_not_modified(self, resp, msg=None, parse_response_as_json=True):
+        msg = response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 304.
         """
         return self.assertEqual(resp.status_code, 304, msg)
 
-    def assert_http_bad_request(self, resp, msg=None):
+    def assert_http_bad_request(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 400.
         """
         return self.assertEqual(resp.status_code, 400, msg)
 
-    def assert_http_unauthorized(self, resp, msg=None):
+    def assert_http_unauthorized(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 401.
         """
         return self.assertEqual(resp.status_code, 401, msg)
 
-    def assert_http_forbidden(self, resp, msg=None):
+    def assert_http_forbidden(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 403.
         """
         return self.assertEqual(resp.status_code, 403, msg)
 
-    def assert_http_not_found(self, resp, msg=None):
+    def assert_http_not_found(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 404.
         """
         return self.assertEqual(resp.status_code, 404, msg)
 
-    def assert_http_method_not_allowed(self, resp, msg=None):
+    def assert_http_method_not_allowed(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 405.
         """
         return self.assertEqual(resp.status_code, 405, msg)
 
-    def assert_http_conflict(self, resp, msg=None):
+    def assert_http_conflict(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 409.
         """
         return self.assertEqual(resp.status_code, 409, msg)
 
-    def assert_http_gone(self, resp, msg=None):
+    def assert_http_gone(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 410.
         """
         return self.assertEqual(resp.status_code, 410, msg)
 
-    def assert_http_unprocessable_entity(self, resp, msg=None):
+    def assert_http_unprocessable_entity(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 422.
         """
         return self.assertEqual(resp.status_code, 422, msg)
 
-    def assert_http_too_many_requests(self, resp, msg=None):
+    def assert_http_too_many_requests(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 429.
         """
         return self.assertEqual(resp.status_code, 429, msg)
 
-    def assert_http_application_error(self, resp, msg=None):
+    def assert_http_application_error(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 500.
         """
         return self.assertEqual(resp.status_code, 500, msg)
 
-    def assert_http_not_implemented(self, resp, msg=None):
+    def assert_http_not_implemented(self, resp, msg=None, parse_response_as_json=True):
+        if parse_response_as_json:
+            msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 501.
         """
