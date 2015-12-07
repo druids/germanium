@@ -85,8 +85,12 @@ def turn_off_auto_now(model_class, field_name):
                 if not field.auto_now:
                     raise RuntimeError('Field %s must have set auto_no to True') % field_name
                 field.auto_now = False
-                function(self, *args, **kwargs)
-                field.auto_now = True
+                try:
+                    function(self, *args, **kwargs)
+                except AssertionError:
+                    raise
+                finally:
+                    field.auto_now = True
         return wraps(function)(_decorator)
 
     return _turn_off_auto_now

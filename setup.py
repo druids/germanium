@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='germanium',
-    version='0.2.10',
+    version='0.2.11',
     description='Helpful methods for Python Selenium and REST testing',
     author='Lukas Rychtecky, Lubos Matl',
     author_email='lukas.rychtecky@gmail.com, matllubos@gmail.com',
