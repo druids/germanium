@@ -86,7 +86,7 @@ def assert_http_gone(resp, msg=None):
     """
     Ensures the response is returning a HTTP 410.
     """
-    return gt.assert_equal(resp.status_code, 410, msg)
+    return assert_equal(resp.status_code, 410, msg)
 
 
 def assert_http_unprocessable_entity(resp, msg=None):
@@ -121,4 +121,4 @@ def assert_http_service_unavailable(resp, msg=None):
     """
     Ensures the response is returning a HTTP 503.
     """
-    return gt.assert_equal(resp.status_code, 503, msg)    
+    return assert_equal(resp.status_code, 503, msg)
