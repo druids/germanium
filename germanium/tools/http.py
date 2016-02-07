@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from .trivials import *
+from .trivials import assert_equal, assert_in
 
 
 def assert_http_ok(resp, msg=None):

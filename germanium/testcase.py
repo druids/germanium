@@ -18,6 +18,7 @@ from germanium.asserts import GermaniumAssertMixin
 from selenium.common.exceptions import WebDriverException
 from germanium.patch import patch_broken_pipe_error
 
+
 SELENIUM_TESTS_WAIT = getattr(settings, 'SELENIUM_TESTS_WAIT', 0.1)
 PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN')
 
