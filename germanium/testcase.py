@@ -105,6 +105,7 @@ def change_and_save(self, **kwargs):
     for attr, val in kwargs.items():
         setattr(self, attr, val)
     self.save()
+    return self
 
 
 def reload(self):
