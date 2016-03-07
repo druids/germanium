@@ -101,10 +101,11 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
         time.sleep(1)
 
 
-def change_and_save(self, **kwargs):
+def change_and_save(self, save_kwargs=None, **kwargs):
+    save_kwargs = {} if save_kwargs is None else save_kwargs
     for attr, val in kwargs.items():
         setattr(self, attr, val)
-    self.save()
+    self.save(**save_kwargs)
     return self
 
 

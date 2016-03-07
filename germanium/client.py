@@ -108,7 +108,7 @@ class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
         return self.assertEqual(resp.status_code, 303, msg)
 
     def assert_http_not_modified(self, resp, msg=None, parse_response_as_json=True):
-        msg = response_as_message(resp, msg)
+        msg = self.response_as_message(resp, msg)
         """
         Ensures the response is returning a HTTP 304.
         """
@@ -201,3 +201,10 @@ class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
         Ensures the response is returning a HTTP 501.
         """
         return self.assertEqual(resp.status_code, 501, msg)
+
+    def response_as_message(self, resp, msg):
+        """
+        Returns a response content for an assert message if no `msg` is provided.
+        Tries to parse the response content as a JSON otherwise returns an original response content.
+        """
+        return resp.content if msg is None else msg

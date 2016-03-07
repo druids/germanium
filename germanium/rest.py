@@ -69,18 +69,6 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
         self.assert_valid_JSON(force_text(resp.content), msg)
 
-    def response_as_message(self, resp, msg):
-        """
-        Returns a response content for an assert message if no `msg` is provided.
-        Tries to parse the response content as a JSON otherwise returns an original response content.
-        """
-        if msg is None:
-            try:
-                msg = self.deserialize(resp)
-            except ValueError:
-                msg = resp.content
-        return msg
-
     def deserialize(self, resp):
         """
         Given a ``HttpResponse`` coming back from using the ``client``, this method

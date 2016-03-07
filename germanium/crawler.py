@@ -1,9 +1,10 @@
 from __future__ import unicode_literals
 
 import logging
-import six
-import six.moves.urllib.parse
 
+import six
+
+from six.moves.urllib import parse
 from six.moves.html_parser import HTMLParser
 
 from django.conf import settings
@@ -95,7 +96,7 @@ class Crawler(object):
         returned_urls = []
 
         for link in self.link_extractors.get(resp['Content-Type'], self.link_extractors['default']).extract(content):
-            parsed_href = urllib.parse.urlparse(link)
+            parsed_href = parse.urlparse(link)
 
             if not parsed_href.path:
                 continue
@@ -105,7 +106,7 @@ class Crawler(object):
                 continue
 
             if ('django.contrib.staticfiles' in settings.INSTALLED_APPS
-                and parsed_href.path.startswith(settings.STATIC_URL)):
+                    and parsed_href.path.startswith(settings.STATIC_URL)):
                 LOG.debug('Skipping static file %s', parsed_href.path)
             elif parsed_href.path.startswith(settings.MEDIA_URL):
                 LOG.debug('Skipping media file %s', parsed_href.path)
@@ -113,7 +114,7 @@ class Crawler(object):
                 returned_urls.append(link)
             else:
                 # We'll use urlparse's urljoin since that handles things like <a href="../foo">
-                returned_urls.append(urllib.parse.urljoin(url, link))
+                returned_urls.append(parse.urljoin(url, link))
 
         return returned_urls
 
