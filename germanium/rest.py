@@ -39,7 +39,7 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         can be loaded properly.
         """
         try:
-            json.loads(data)
+            json.loads(force_text(data))
         except:
             self.fail(msg)
 
@@ -54,7 +54,7 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         """
         self.assert_http_ok(resp, msg)
         self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
-        self.assert_valid_JSON(force_text(resp.content), msg)
+        self.assert_valid_JSON(resp.content, msg)
 
     def assert_valid_JSON_created_response(self, resp, msg=None):
         """
@@ -67,7 +67,7 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         """
         self.assert_http_created(resp, msg)
         self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
-        self.assert_valid_JSON(force_text(resp.content), msg)
+        self.assert_valid_JSON(resp.content, msg)
 
     def deserialize(self, resp):
         """

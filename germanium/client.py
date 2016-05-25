@@ -9,9 +9,10 @@ from django.test.client import RequestFactory
 from germanium.auth import AuthTestCaseMixin
 from germanium import config
 from germanium.asserts import AssertMixin
+from germanium.testcase import GermaniumTestCase
 
 
-class ClientTestCase(AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
+class ClientTestCase(GermaniumTestCase, AuthTestCaseMixin, LiveServerTestCase, AssertMixin):
 
     logger = logging.getLogger('tests')
 

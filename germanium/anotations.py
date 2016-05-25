@@ -56,9 +56,16 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
 
         def get_data(self):
             if isinstance(fn_data_provider_or_str, six.string_types):
-                return getattr(self, fn_data_provider_or_str)(*data_provider_args, **data_provider_kwargs)
+                provider_args = data_provider_args
+                method_or_property = getattr(self, fn_data_provider_or_str)
             else:
-                return fn_data_provider_or_str(self, *data_provider_args, **data_provider_kwargs)
+                provider_args = (self,) + data_provider_args
+                method_or_property = fn_data_provider_or_str
+
+            return (
+                method_or_property if not hasattr(method_or_property, '__call__')
+                else method_or_property(*provider_args, **data_provider_kwargs)
+            )
 
         def repl(self, *args):
             data = get_data(self)

@@ -13,14 +13,13 @@ from selenium import webdriver
 
 from germanium import config
 from germanium.auth import AuthTestCaseMixin
-from germanium.asserts import GermaniumAssertMixin
 
 from selenium.common.exceptions import WebDriverException
 from germanium.patch import patch_broken_pipe_error
 
 
 SELENIUM_TESTS_WAIT = getattr(settings, 'SELENIUM_TESTS_WAIT', 0.1)
-PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN')
+PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN', None)
 
 
 class ConfigurableWaitDriver(MyDriver):
@@ -29,7 +28,7 @@ class ConfigurableWaitDriver(MyDriver):
         driver = getattr(webdriver, selenium_settings.SELENIUM_DRIVER, None)
         assert driver, "settings.SELENIUM_DRIVER contains non-existing driver"
         if driver is webdriver.PhantomJS and PHANTOM_JS_BIN:
-            self.driver = driver(settings.PHANTOM_JS_BIN)
+            self.driver = driver(PHANTOM_JS_BIN)
             self.live_server_url = 'http://%s:%s' % (selenium_settings.SELENIUM_TESTSERVER_HOST,
                                                      str(selenium_settings.SELENIUM_TESTSERVER_PORT))
             self.text = ''
@@ -48,7 +47,32 @@ class ConfigurableWaitDriver(MyDriver):
             pass
 
 
-class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestCase):
+
+def change_and_save(self, save_kwargs=None, **kwargs):
+    save_kwargs = {} if save_kwargs is None else save_kwargs
+    for attr, val in kwargs.items():
+        setattr(self, attr, val)
+    self.save(**save_kwargs)
+    return self
+
+
+def reload(self):
+    if self.pk:
+        self = self.__class__.objects.get(pk=self.pk)
+    self.change_and_save = types.MethodType(change_and_save, self)
+    self.reload = types.MethodType(reload, self)
+    return self
+
+
+class GermaniumTestCaseMixin(object):
+    fixtures = getattr(settings, 'GERMANIUM_FIXTURES', [])
+
+
+class GermaniumTestCase(GermaniumTestCaseMixin, TestCase):
+    pass
+
+
+class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, LiveServerTestCase):
 
     is_logged = False
 
@@ -101,23 +125,7 @@ class GermaniumTestCase(AuthTestCaseMixin, GermaniumAssertMixin, LiveServerTestC
         time.sleep(1)
 
 
-def change_and_save(self, save_kwargs=None, **kwargs):
-    save_kwargs = {} if save_kwargs is None else save_kwargs
-    for attr, val in kwargs.items():
-        setattr(self, attr, val)
-    self.save(**save_kwargs)
-    return self
-
-
-def reload(self):
-    if self.pk:
-        self = self.__class__.objects.get(pk=self.pk)
-    self.change_and_save = types.MethodType(change_and_save, self)
-    self.reload = types.MethodType(reload, self)
-    return self
-
-
-class ModelTestCase(TestCase):
+class ModelTestCase(GermaniumTestCase):
 
     factory_class = None
 

@@ -4,11 +4,11 @@ from django_nose.tools import *
 
 
 def assert_is_none(expr, msg=None):
-    assert_equals(expr, None, msg)
+    assert_equal(expr, None, msg)
 
 
 def assert_is_not_none(expr, msg=None):
-    assert_not_equals(expr, None, msg)
+    assert_not_equal(expr, None, msg)
 
 
 def fail(msg=None):
