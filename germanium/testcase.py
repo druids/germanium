@@ -47,6 +47,11 @@ class ConfigurableWaitDriver(MyDriver):
             pass
 
 
+def convert_to_test_obj(obj):
+    obj.change_and_save = types.MethodType(change_and_save, obj)
+    obj.reload = types.MethodType(reload, obj)
+    return obj
+
 
 def change_and_save(self, save_kwargs=None, **kwargs):
     save_kwargs = {} if save_kwargs is None else save_kwargs
@@ -59,8 +64,7 @@ def change_and_save(self, save_kwargs=None, **kwargs):
 def reload(self):
     if self.pk:
         self = self.__class__.objects.get(pk=self.pk)
-    self.change_and_save = types.MethodType(change_and_save, self)
-    self.reload = types.MethodType(reload, self)
+    convert_to_test_obj(self)
     return self
 
 
@@ -135,8 +139,7 @@ class ModelTestCase(GermaniumTestCase):
             inst = factory_class._get_model_class().objects.get(pk=inst_kwargs.get('pk'))
         else:
             inst = factory_class(**inst_kwargs)
-        inst.change_and_save = types.MethodType(change_and_save, inst)
-        inst.reload = types.MethodType(reload, inst)
+        convert_to_test_obj(inst)
         return inst
 
     def insts_data_provider(self, count=10, **inst_kwargs):
