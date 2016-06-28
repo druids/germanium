@@ -69,7 +69,8 @@ def reload(self):
 
 
 class GermaniumTestCaseMixin(object):
-    fixtures = getattr(settings, 'GERMANIUM_FIXTURES', [])
+    if getattr(settings, 'GERMANIUM_FIXTURES', None):
+        fixtures = getattr(settings, 'GERMANIUM_FIXTURES', None)
 
 
 class GermaniumTestCase(GermaniumTestCaseMixin, TestCase):

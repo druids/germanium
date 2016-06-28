@@ -20,7 +20,6 @@ setup(
         'PyVirtualDisplay>=0.1.2',
         'selenium>=2.37.2',
         'nose>=1.3.6',
-        'django-nose>=1.4.1'
     ],
     include_package_data=True,
     zip_safe=False,
