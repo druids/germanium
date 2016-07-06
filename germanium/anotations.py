@@ -74,7 +74,7 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
             for i in data:
                 sid = transaction.savepoint()
                 try:
-                    if isinstance(i, collections.Iterable):
+                    if isinstance(i, collections.Iterable) and not isinstance(i, six.string_types):
                         fn(self, *i)
                     else:
                         fn(self, i)
