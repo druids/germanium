@@ -124,12 +124,13 @@ class Crawler(object):
 
         return url, headers
 
-    def _post_response(self, url, referer, resp, exception=None):
+    def _post_response(self, url, referer, resp=None, exception=None):
         if self.post_response:
             self.post_response(url, referer, resp, exception)
 
     def _call_request(self, url_with_referer):
         url, referer = url_with_referer.url, url_with_referer.referer
+        resp = None
         try:
             url, headers = self._pre_request(url, referer, {})
             resp = self.client.get(url, follow=True, **headers)
