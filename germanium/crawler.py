@@ -1,5 +1,7 @@
 from __future__ import unicode_literals
 
+import re
+
 import logging
 
 import six
@@ -77,12 +79,14 @@ class Crawler(object):
             for url in base_urls:
                 self.urls.add(UrlWithReferer(url))
 
-        self.crawled_urls = set(exclude_urls or ())
+        self.crawled_urls = set()
+        self.exclude_urls = set(exclude_urls or ())
         self.pre_request = pre_request
         self.post_response = post_response
         self.link_extractors = {'default': HtmlLinkExtractor()}
         if extra_link_extractors:
             self.link_extractors.update(extra_link_extractors)
+        self.excluded_urls_regexs = [re.compile(r'^{}$'.format(url)) for url in self.exclude_urls]
 
     def run(self):
         while self.urls:
@@ -138,7 +142,9 @@ class Crawler(object):
             if resp.redirect_chain:
                 self.crawled_urls.update((redirect_url for redirect_url, _ in resp.redirect_chain))
             for parsed_url in self._parse_urls(url, resp):
-                if parsed_url not in self.crawled_urls and parsed_url not in self.urls:
+                if (parsed_url not in self.crawled_urls and parsed_url not in self.urls and
+                        not any(excluded_urls_regex.match(parsed_url)
+                                for excluded_urls_regex in self.excluded_urls_regexs)):
                     self.urls.add(UrlWithReferer(parsed_url, url))
             e = None
         except Exception as e:
