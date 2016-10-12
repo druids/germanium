@@ -88,10 +88,10 @@ class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, Liv
     @classmethod
     def set_up_class(cls):
         patch_broken_pipe_error()
-        super(GermaniumTestCase, cls).setUpClass()
+        super(GermaniumLiveServerTestCase, cls).setUpClass()
 
     def setUp(self):
-        super(GermaniumTestCase, self).setUp()
+        super(GermaniumLiveServerTestCase, self).setUp()
         self.set_up()
 
     def set_up(self):
@@ -101,7 +101,7 @@ class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, Liv
 
     def tearDown(self):
         self.tear_down()
-        super(GermaniumTestCase, self).tearDown()
+        super(GermaniumLiveServerTestCase, self).tearDown()
 
     def tear_down(self):
         self.driver.quit()
@@ -113,7 +113,7 @@ class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, Liv
 
     @classmethod
     def tear_down_class(cls):
-        super(GermaniumTestCase, cls).tearDownClass()
+        super(GermaniumLiveServerTestCase, cls).tearDownClass()
 
     def open(self, url=''):
         self.driver.open_url(url)
