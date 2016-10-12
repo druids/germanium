@@ -3,20 +3,17 @@ from __future__ import unicode_literals
 import time
 import types
 
-from django.test.testcases import LiveServerTestCase, TestCase
-from django.conf import settings
-
-from django_selenium.testcases import MyDriver
-from django_selenium import settings as selenium_settings
-
-from selenium import webdriver
-
 from germanium import config
 from germanium.auth import AuthTestCaseMixin
-
-from selenium.common.exceptions import WebDriverException
 from germanium.patch import patch_broken_pipe_error
+from selenium import webdriver
+from selenium.common.exceptions import WebDriverException
 
+from django.conf import settings
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from django.test.testcases import TestCase
+from django_selenium import settings as selenium_settings
+from django_selenium.testcases import MyDriver
 
 SELENIUM_TESTS_WAIT = getattr(settings, 'SELENIUM_TESTS_WAIT', 0.1)
 PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN', None)
@@ -77,7 +74,7 @@ class GermaniumTestCase(GermaniumTestCaseMixin, TestCase):
     pass
 
 
-class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, LiveServerTestCase):
+class GermaniumLiveServerTestCase(GermaniumTestCaseMixin, AuthTestCaseMixin, StaticLiveServerTestCase):
 
     is_logged = False
 
