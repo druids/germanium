@@ -21,17 +21,35 @@ class RESTTestCase(ClientTestCase, AssertMixin):
                                                                config.PASSWORD: password},
                                             content_type=MULTIPART_CONTENT))
 
+    def get(self, url, content_type='application/json', headers=None):
+        headers = headers or {}
+        headers['Accept'] = headers.get('Accept', content_type)
+        headers.update(self.default_headers)
+
+        resp = self.c.get(url, content_type=content_type, **headers)
+        return resp
+
     def put(self, url, data={}, content_type='application/json', headers=None):
         headers = headers or {}
+        headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
         return self.c.put(url, data=data, content_type=content_type, **headers)
 
     def post(self, url, data, content_type='application/json', headers=None):
         headers = headers or {}
+        headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
         return self.c.post(url, data=data, content_type=content_type, **headers)
+
+    def delete(self, url, content_type='application/json', headers=None):
+        headers = headers or {}
+        headers['Accept'] = headers.get('Accept', content_type)
+        headers.update(self.default_headers)
+
+        resp = self.c.delete(url, **headers)
+        return resp
 
     def assert_valid_JSON(self, data, msg='Json is not valid'):
         """

@@ -1,6 +1,12 @@
 from __future__ import unicode_literals
 
+from six.moves.urllib.parse import urlencode
+
 from .trivials import assert_equal, assert_in
+
+
+def build_url(path, querystring_dict):
+    return '{}?{}'.format(path, urlencode(querystring_dict)) if querystring_dict else path
 
 
 def assert_http_ok(resp, msg=None):
