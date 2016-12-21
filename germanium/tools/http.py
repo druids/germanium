@@ -1,12 +1,23 @@
 from __future__ import unicode_literals
 
+from django.utils.encoding import force_text
+
 from six.moves.urllib.parse import urlencode
 
 from .trivials import assert_equal, assert_in
 
 
-def build_url(path, querystring_dict):
-    return '{}?{}'.format(path, urlencode(querystring_dict)) if querystring_dict else path
+def get_full_path(*paths):
+    string_paths = (force_text(path) for path in paths)
+    full_path = '/'.join((path[:-1] if path.endswith('/') else path for path in string_paths))
+    return full_path if full_path.endswith('/') else full_path + '/'
+
+
+def build_url(*paths, **querystring_dict):
+    return (
+        '{}?{}'.format(get_full_path(*paths), urlencode(querystring_dict))
+        if querystring_dict else get_full_path(*paths)
+    )
 
 
 def assert_http_ok(resp, msg=None):

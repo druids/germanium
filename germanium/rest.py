@@ -11,7 +11,20 @@ from germanium import config
 from germanium.asserts import AssertMixin
 
 
+JSON_CONTENT_TYPE = 'application/json'
+
+
 class RESTTestCase(ClientTestCase, AssertMixin):
+
+    SERIALIZERS = {
+        JSON_CONTENT_TYPE: lambda data: json.dumps(data, cls=DjangoJSONEncoder),
+        MULTIPART_CONTENT: lambda data: data,
+    }
+
+    DESERIALIZERS = {
+        JSON_CONTENT_TYPE: lambda resp: json.loads(resp.content.decode('utf-8')),
+        MULTIPART_CONTENT: lambda resp: resp,
+    }
 
     def setUp(self):
         super(RESTTestCase, self).setUp()
@@ -21,7 +34,8 @@ class RESTTestCase(ClientTestCase, AssertMixin):
                                                                config.PASSWORD: password},
                                             content_type=MULTIPART_CONTENT))
 
-    def get(self, url, content_type='application/json', headers=None):
+    def get(self, url, content_type=None, headers=None):
+        content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
@@ -29,21 +43,26 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         resp = self.c.get(url, content_type=content_type, **headers)
         return resp
 
-    def put(self, url, data={}, content_type='application/json', headers=None):
+    def put(self, url, data={}, content_type=None, headers=None):
+        content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        return self.c.put(url, data=data, content_type=content_type, **headers)
+        return self.c.put(url, data=self.serialize(data, content_type) if data is not None else data,
+                          content_type=content_type, **headers)
 
-    def post(self, url, data, content_type='application/json', headers=None):
+    def post(self, url, data, content_type=None, headers=None):
+        content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        return self.c.post(url, data=data, content_type=content_type, **headers)
+        return self.c.post(url, data=self.serialize(data, content_type) if data is not None else data,
+                           content_type=content_type, **headers)
 
-    def delete(self, url, content_type='application/json', headers=None):
+    def delete(self, url, content_type=None, headers=None):
+        content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
@@ -87,19 +106,29 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
         self.assert_valid_JSON(resp.content, msg)
 
-    def deserialize(self, resp):
+    def deserialize(self, resp, content_type=None):
         """
         Given a ``HttpResponse`` coming back from using the ``client``, this method
         return dict of deserialized json string
         """
-        return json.loads(resp.content.decode('utf-8'))
+        content_type = content_type or JSON_CONTENT_TYPE
+        deserializer = self.DESERIALIZERS.get(content_type)
+        if deserializer is None:
+            raise NotImplementedError('Missing DEserializer')
+        else:
+            return deserializer(resp)
 
-    def serialize(self, data):
+    def serialize(self, data, content_type=None):
         """
         Given a Python datastructure (typically a ``dict``) & a desired  json,
         this method will return a serialized string of that data.
         """
-        return json.dumps(data, cls=DjangoJSONEncoder)
+        content_type = content_type or JSON_CONTENT_TYPE
+        serializer = self.SERIALIZERS.get(content_type)
+        if serializer is None:
+            raise NotImplementedError('Missing serializer')
+        else:
+            return serializer(data)
 
     def assert_keys(self, data, expected):
         """
