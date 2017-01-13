@@ -134,8 +134,22 @@ def assert_http_not_implemented(resp, msg=None):
     return assert_equal(resp.status_code, 501, msg)
 
 
+def assert_http_bad_gateway(resp, msg=None):
+    """
+    Ensures the response is returning a HTTP 502.
+    """
+    return assert_equal(resp.status_code, 502, msg)
+
+
 def assert_http_service_unavailable(resp, msg=None):
     """
     Ensures the response is returning a HTTP 503.
     """
     return assert_equal(resp.status_code, 503, msg)
+
+
+def assert_http_gateway_timeout(resp, msg=None):
+    """
+    Ensures the response is returning a HTTP 504.
+    """
+    return assert_equal(resp.status_code, 504, msg)
