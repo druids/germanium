@@ -6,7 +6,6 @@ import six
 
 from functools import wraps
 
-from django.db import transaction
 from django.db.models.fields import DateField, DateTimeField
 from django.db import transaction
 
