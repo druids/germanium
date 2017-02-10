@@ -1,0 +1,5 @@
+*.pyc
+dist
+django_simple_utilities.egg-info/
+pip-log.txt
+*.gz
