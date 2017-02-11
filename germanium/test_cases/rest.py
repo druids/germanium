@@ -3,18 +3,19 @@ from __future__ import unicode_literals
 import json
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.utils.encoding import force_text
 from django.test.client import MULTIPART_CONTENT
 
-from germanium.client import ClientTestCase
 from germanium import config
-from germanium.asserts import AssertMixin
+from germanium.tools.http import assert_http_redirect
+
+from .client import ClientTestCaseMixin
+from .default import GermaniumTestCase, GermaniumSimpleTestCase
 
 
 JSON_CONTENT_TYPE = 'application/json'
 
 
-class RESTTestCase(ClientTestCase, AssertMixin):
+class RESTTestCaseMixin(ClientTestCaseMixin):
 
     SERIALIZERS = {
         JSON_CONTENT_TYPE: lambda data: json.dumps(data, cls=DjangoJSONEncoder),
@@ -26,12 +27,9 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         MULTIPART_CONTENT: lambda resp: resp,
     }
 
-    def setUp(self):
-        super(RESTTestCase, self).setUp()
-
     def authorize(self, username, password):
-        self.assert_http_redirect(self.post(config.LOGIN_URL, {config.USERNAME: username,
-                                                               config.PASSWORD: password},
+        assert_http_redirect(self.post(config.LOGIN_URL, {config.USERNAME: username,
+                                                          config.PASSWORD: password},
                                             content_type=MULTIPART_CONTENT))
 
     def get(self, url, content_type=None, headers=None):
@@ -70,42 +68,6 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         resp = self.c.delete(url, **headers)
         return resp
 
-    def assert_valid_JSON(self, data, msg='Json is not valid'):
-        """
-        Given the provided ``data`` as a string, ensures that it is valid JSON &
-        can be loaded properly.
-        """
-        try:
-            json.loads(force_text(data))
-        except:
-            self.fail(msg)
-
-    def assert_valid_JSON_response(self, resp, msg=None):
-        """
-        Given a ``HttpResponse`` coming back from using the ``client``, assert that
-        you get back:
-
-        * An HTTP 200
-        * The correct content-type (``application/json``)
-        * The content is valid JSON
-        """
-        self.assert_http_ok(resp, msg)
-        self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
-        self.assert_valid_JSON(resp.content, msg)
-
-    def assert_valid_JSON_created_response(self, resp, msg=None):
-        """
-        Given a ``HttpResponse`` coming back from using the ``client``, assert that
-        you get back:
-
-        * An HTTP 201
-        * The correct content-type (``application/json``)
-        * The content is valid JSON
-        """
-        self.assert_http_created(resp, msg)
-        self.assert_true(resp['Content-Type'].startswith('application/json'), msg)
-        self.assert_valid_JSON(resp.content, msg)
-
     def deserialize(self, resp, content_type=None):
         """
         Given a ``HttpResponse`` coming back from using the ``client``, this method
@@ -130,13 +92,10 @@ class RESTTestCase(ClientTestCase, AssertMixin):
         else:
             return serializer(data)
 
-    def assert_keys(self, data, expected):
-        """
-        This method ensures that the keys of the ``data`` match up to the keys of
-        ``expected``.
 
-        It covers the (extremely) common case where you want to make sure the keys of
-        a response match up to what is expected. This is typically less fragile than
-        testing the full structure, which can be prone to data changes.
-        """
-        self.assert_equal(sorted(data.keys()), sorted(expected))
+class RESTTestCase(RESTTestCaseMixin, GermaniumTestCase):
+    pass
+
+
+class SimpleRESTTestCase(RESTTestCaseMixin, GermaniumSimpleTestCase):
+    pass

@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from django.conf import settings
 
+
 FLASH = getattr(settings, 'FLASH', '.flash')
 FLASH_TYPE = getattr(settings, 'FLASH_TYPE', {
     'success': '.alert-success',
