@@ -20,6 +20,7 @@ setup(
         'PyVirtualDisplay>=0.1.2',
         'selenium>=2.37.2',
         'nose>=1.3.6',
+        'responses>=0.5.1',
     ],
     include_package_data=True,
     zip_safe=False,
