@@ -39,6 +39,3 @@ class MigrationTestCase(GermaniumTestCase):
 
     def set_up_before_migration(self, apps):
         pass
-
-    def test_after_migration(self):
-        pass
