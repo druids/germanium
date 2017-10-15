@@ -1,13 +1,13 @@
 from __future__ import unicode_literals
 
 import collections
+from functools import wraps
 
 import six
 
-from functools import wraps
-
-from django.db.models.fields import DateField, DateTimeField
+import responses
 from django.db import transaction
+from django.db.models.fields import DateField, DateTimeField
 
 
 def login(function=None, users_generator='get_user', **users_kwargs):
@@ -81,6 +81,7 @@ def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_
                     raise
                 finally:
                     transaction.savepoint_rollback(sid)
+                    responses.reset()
         return wraps(fn)(repl)
     return test_decorator
 
