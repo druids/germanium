@@ -1,13 +1,9 @@
-from __future__ import unicode_literals
-
 import re
 
 import logging
 
-import six
-
-from six.moves.urllib import parse
-from six.moves.html_parser import HTMLParser
+from urllib.parse import urlparse, urljoin
+from html.parser import HTMLParser
 
 from django.conf import settings
 
@@ -15,7 +11,7 @@ from django.conf import settings
 LOG = logging.getLogger('tests')
 
 
-class LinkExtractor(object):
+class LinkExtractor:
 
     def extract(self, content):
         raise NotImplementedError
@@ -43,7 +39,7 @@ class HtmlLinkExtractor(LinkExtractor):
         return parser.links
 
 
-class UrlWithReferer(object):
+class UrlWithReferer:
 
     def __init__(self, url, referer=None):
         self.url = url
@@ -52,7 +48,7 @@ class UrlWithReferer(object):
     def __eq__(self, other):
         if isinstance(other, UrlWithReferer):
             return self.url == other.url
-        if isinstance(object, six.string_types):
+        if isinstance(object, str):
             return self.url == other
         return False
 
@@ -69,7 +65,7 @@ class UrlWithReferer(object):
         return self.url
 
 
-class Crawler(object):
+class Crawler:
 
     def __init__(self, client, base_urls=None, exclude_urls=None, pre_request=None, post_response=None,
                  extra_link_extractors=None):
@@ -100,7 +96,7 @@ class Crawler(object):
         returned_urls = []
 
         for link in self.link_extractors.get(resp['Content-Type'], self.link_extractors['default']).extract(content):
-            parsed_href = parse.urlparse(link)
+            parsed_href = urlparse(link)
 
             if not parsed_href.path:
                 continue
@@ -118,7 +114,7 @@ class Crawler(object):
                 returned_urls.append(link)
             else:
                 # We'll use urlparse's urljoin since that handles things like <a href="../foo">
-                returned_urls.append(parse.urljoin(url, link))
+                returned_urls.append(urljoin(url, link))
 
         return returned_urls
 

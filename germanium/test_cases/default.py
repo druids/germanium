@@ -1,12 +1,10 @@
-from __future__ import unicode_literals
-
 import types
 
 from django.conf import settings
 from django.test.testcases import TestCase, SimpleTestCase
 
 
-class GermaniumSimpleTestCaseMixin(object):
+class GermaniumSimpleTestCaseMixin:
 
     @classmethod
     def setUpClass(cls):

@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import time
 
 from germanium import config
@@ -7,10 +5,10 @@ from germanium import config
 from selenium.webdriver.common.action_chains import ActionChains
 
 from django_selenium.testcases import wait, SeleniumElement
-import six
 
 
-class CSSMixin(object):
+class CSSMixin:
+
     main_wrapper = ''
 
     def css(self, selector):
@@ -64,7 +62,7 @@ class CSSMixin(object):
         self.css(' '.join((config.MODAL_DIALOG, config.BTN_SAVE))).click()
 
     def _get_element_from_selector(self, selector_or_el):
-        if isinstance(selector_or_el, six.string_types):
+        if isinstance(selector_or_el, str):
             selector_or_el = self.css(selector_or_el)
         return selector_or_el
 

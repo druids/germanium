@@ -1,8 +1,6 @@
-from __future__ import unicode_literals
+from urllib.parse import urlencode
 
 from django.utils.encoding import force_text
-
-from six.moves.urllib.parse import urlencode
 
 from .trivials import assert_equal, assert_in
 

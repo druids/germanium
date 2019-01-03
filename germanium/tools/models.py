@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from .trivials import assert_equal, assert_true, assert_false
 
 
