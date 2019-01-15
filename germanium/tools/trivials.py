@@ -9,7 +9,7 @@ from nose.tools import (assert_equal, assert_true, assert_false, assert_in, asse
                         assert_almost_equal, assert_not_almost_equal, assert_greater_equal, assert_less_equal,
                         assert_not_is_instance, assert_list_equal, assert_tuple_equal, assert_set_equal,
                         assert_dict_equal, assert_sequence_equal, assert_multi_line_equal, assert_is_none,
-                        assert_is_not_none, assert_equals)
+                        assert_is_not_none, assert_equals, assert_logs)
 
 
 def fail(msg=None):
