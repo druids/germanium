@@ -1,6 +1,3 @@
-from __future__ import unicode_literals
-
-
 from germanium.tools import assert_true, assert_equal
 from germanium import config
 from germanium.sugar import CSSMixin

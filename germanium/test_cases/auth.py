@@ -1,7 +1,5 @@
-from __future__ import unicode_literals
 
-
-class UserProxy(object):
+class UserProxy:
 
     def __init__(self, username, password, user=None):
         self.username = username
@@ -9,7 +7,7 @@ class UserProxy(object):
         self.user = user
 
 
-class AuthTestCaseMixin(object):
+class AuthTestCaseMixin:
 
     logged_user = None
 

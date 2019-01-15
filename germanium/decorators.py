@@ -1,13 +1,28 @@
-from __future__ import unicode_literals
-
 import collections
 from functools import wraps
 
-import six
+from inspect import isclass, isfunction, ismethod, getfullargspec
 
 import responses
 from django.db import transaction
+from django.db.models import Model
 from django.db.models.fields import DateField, DateTimeField
+from django.utils.functional import cached_property
+
+
+def is_iterable(data):
+    return isinstance(data, collections.Iterable) and not isinstance(data, str)
+
+
+def refresh_model_object(obj):
+    obj.refresh_from_db()
+    for key, value in obj.__class__.__dict__.items():
+        if isinstance(value, cached_property):
+            obj.__dict__.pop(key, None)
+
+
+def refresh_model_objects(*data):
+    [refresh_model_object(obj) for obj in data if isinstance(obj, Model) and obj.pk]
 
 
 def login(function=None, users_generator='get_user', **users_kwargs):
@@ -15,7 +30,7 @@ def login(function=None, users_generator='get_user', **users_kwargs):
 
     def _login(function):
         def _decorator(self, *args, **kwargs):
-            if isinstance(users_generator, six.string_types):
+            if isinstance(users_generator, str):
                 users = getattr(self, users_generator)(**users_kwargs)
             else:
                 users = users_generator(self, **users_kwargs)
@@ -48,40 +63,44 @@ def login_all(cls=None, **user_kwargs):
     return _login_all
 
 
-def data_provider(fn_data_provider_or_str, *data_provider_args, **data_provider_kwargs):
+def data_provider(callable_or_property_or_str, *data_provider_args, **data_provider_kwargs):
     """Data provider decorator, allows another callable to provide the data for the test"""
 
     def test_decorator(fn):
 
-        def get_data(self):
-            if isinstance(fn_data_provider_or_str, six.string_types):
-                provider_args = data_provider_args
-                method_or_property = getattr(self, fn_data_provider_or_str)
-            else:
-                provider_args = (self,) + data_provider_args
-                method_or_property = fn_data_provider_or_str
-
-            return (
-                method_or_property if not hasattr(method_or_property, '__call__')
-                else method_or_property(*provider_args, **data_provider_kwargs)
+        def get_data(self, *args):
+            callable_or_property = (
+                getattr(self, callable_or_property_or_str)
+                if isinstance(callable_or_property_or_str, str) else callable_or_property_or_str
             )
+            if (isfunction(callable_or_property) and next(iter(getfullargspec(callable_or_property).args),
+                                                          None) == 'self'):
+                return callable_or_property(self, *data_provider_args, *args, **data_provider_kwargs)
+            elif ismethod(callable_or_property) or isclass(callable_or_property) or isfunction(callable_or_property):
+                return callable_or_property(*data_provider_args, *args, **data_provider_kwargs)
+            else:
+                return [list(args) + list(val if is_iterable(val) else [val]) for val in callable_or_property]
 
         def repl(self, *args):
-            data = get_data(self)
-            if not isinstance(data, collections .Iterable):
+            data = get_data(self, *args)
+            if not is_iterable(data):
                 data = (data,)
-            for i in data:
-                sid = transaction.savepoint()
-                try:
-                    if isinstance(i, collections.Iterable) and not isinstance(i, six.string_types):
-                        fn(self, *i)
-                    else:
-                        fn(self, i)
-                except AssertionError:
-                    raise
-                finally:
-                    transaction.savepoint_rollback(sid)
-                    responses.reset()
+            for fn_args in data:
+                if not is_iterable(fn_args):
+                    fn_args = [fn_args]
+                if getattr(fn, 'data_provider', False):
+                    fn(self, *fn_args)
+                else:
+                    sid = transaction.savepoint()
+                    try:
+                        fn(self, *fn_args)
+                    except AssertionError:
+                        raise
+                    finally:
+                        transaction.savepoint_rollback(sid)
+                        responses.reset()
+                        refresh_model_objects(*fn_args)
+            repl.data_provider = True
         return wraps(fn)(repl)
     return test_decorator
 

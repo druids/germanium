@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 from django.conf import settings
 
 
@@ -33,3 +31,5 @@ LOGIN_URL = getattr(settings, 'LOGIN_URL', '/login')
 
 PHANTOM_JS_BIN = getattr(settings, 'PHANTOM_JS_BIN', 'phantomjs')
 WINDOW_SIZE = (1124, 850)
+
+TURN_OFF_MAX_DIFF = getattr(settings, 'TURN_OFF_MAX_DIFF', True)
