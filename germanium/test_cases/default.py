@@ -3,8 +3,12 @@ import types
 from django.conf import settings
 from django.test.testcases import TestCase, SimpleTestCase
 
+from germanium.config import MULTI_DB_TESTS
+
 
 class GermaniumSimpleTestCaseMixin:
+
+    multi_db = MULTI_DB_TESTS
 
     @classmethod
     def setUpClass(cls):
