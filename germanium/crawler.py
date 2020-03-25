@@ -152,8 +152,7 @@ class Crawler:
                         not any(excluded_urls_regex.match(parsed_url)
                                 for excluded_urls_regex in self.excluded_urls_regexs)):
                     self.urls.add(URLWithReferer(parsed_url, url))
-            e = None
+            self._post_response(url, referer, resp)
         except Exception as e:
             LOG.exception('%s had unhandled exception: %s', url, e)
-
-        self._post_response(url, referer, resp, e)
+            self._post_response(url, referer, resp, e)
