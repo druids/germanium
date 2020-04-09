@@ -4,18 +4,10 @@ from germanium import config
 
 from selenium.webdriver.common.action_chains import ActionChains
 
-from django_selenium.testcases import wait, SeleniumElement
-
 
 class CSSMixin:
 
     main_wrapper = ''
-
-    def css(self, selector):
-        return SeleniumElement(self.driver.find_elements_by_css_selector(selector), selector)
-
-    def xpath(self, selector):
-        return SeleniumElement(self.driver.find_elements_by_xpath(selector), selector)
 
     def css_in(self, selector):
         return self.css(' '.join((self.main_wrapper, selector)))

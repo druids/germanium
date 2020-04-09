@@ -15,8 +15,7 @@ setup(
         'Programming Language :: Python',
     ],
     install_requires=[
-        'django>=1.8',
-        'django-selenium>=0.9.6',
+        'django>=2.2',
         'PyVirtualDisplay>=0.1.2',
         'selenium>=2.37.2',
         'nose>=1.3.6',
