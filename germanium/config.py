@@ -34,4 +34,4 @@ WINDOW_SIZE = (1124, 850)
 
 TURN_OFF_MAX_DIFF = getattr(settings, 'TURN_OFF_MAX_DIFF', True)
 
-MULTI_DB_TESTS = getattr(settings, 'GERMANIUM_MULTI_DB_TESTS', False)
+TEST_ALL_DATABASES = getattr(settings, 'GERMANIUM_TEST_ALL_DATABASES', False)
