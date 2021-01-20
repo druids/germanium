@@ -30,3 +30,8 @@ def assert_qs_not_contains(qs, obj, msg=None):
         qs.filter(pk__in=get_pks(obj if isinstance(obj, (set, list, tuple)) else {obj})).exists(),
         msg
     )
+
+
+def assert_equal_model_fields(model_instance, **field_values):
+    for field_name, field_value in field_values.items():
+        assert_equal(getattr(model_instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name))

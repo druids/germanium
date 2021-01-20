@@ -201,18 +201,18 @@ def turn_off_auto_now(model_class, field_name):
 
     def _turn_off_auto_now(function):
         def _decorator(self, *args, **kwargs):
-                field = model_class._meta.get_field(field_name)
-                if not isinstance(field, (DateField, DateTimeField)):
-                    raise RuntimeError('Field %s must be DateField or DateTimeField type') % field_name
-                if not field.auto_now:
-                    raise RuntimeError('Field %s must have set auto_no to True') % field_name
-                field.auto_now = False
-                try:
-                    function(self, *args, **kwargs)
-                except AssertionError:
-                    raise
-                finally:
-                    field.auto_now = True
+            field = model_class._meta.get_field(field_name)
+            if not isinstance(field, (DateField, DateTimeField)):
+                raise RuntimeError('Field %s must be DateField or DateTimeField type') % field_name
+            if not field.auto_now:
+                raise RuntimeError('Field %s must have set auto_no to True') % field_name
+            field.auto_now = False
+            try:
+                function(self, *args, **kwargs)
+            except AssertionError:
+                raise
+            finally:
+                field.auto_now = True
         return wraps(function)(_decorator)
 
     return _turn_off_auto_now
