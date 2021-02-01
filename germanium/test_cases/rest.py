@@ -64,7 +64,7 @@ class RESTTestCaseMixin(ClientTestCaseMixin):
         headers.update(self.default_headers)
 
         return self.c.patch(url, data=self.serialize(data, content_type) if data is not None else data,
-                           content_type=content_type, **headers)
+                            content_type=content_type, **headers)
 
     def delete(self, url, content_type=None, headers=None):
         content_type = content_type or JSON_CONTENT_TYPE
