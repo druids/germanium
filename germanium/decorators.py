@@ -142,12 +142,15 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
     elif named_data and not isinstance(data, NamedTestData):
         named_data = None
 
+    is_data_consumer = getattr(method, 'is_data_consumer', False)
     if use_rollback:
         sid = transaction.savepoint()
     try:
-        if getattr(method, 'is_data_consumer', False):
+        if is_data_consumer:
             method(self, data=data, named_data=named_data)
         else:
+            if hasattr(self, 'set_up_data_consumer'):
+                self.tear_up_data_consumer()
             call(method, self, ((data,) if not is_iterable(data) else data), named_data)
     finally:
         if use_rollback:
@@ -156,6 +159,8 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
             refresh_model_objects(
                 *(data.data.values() if isinstance(data, NamedTestData) else data)
             )
+        if not is_data_consumer and hasattr(self, 'tear_down_data_consumer'):
+            self.tear_down_data_consumer()
 
 
 def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provider_kwargs):
