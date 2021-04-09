@@ -10,7 +10,6 @@ from nose.tools import (
     assert_dict_equal, assert_sequence_equal, assert_multi_line_equal, assert_is_none, assert_is_not_none,
     assert_equals, assert_logs
 )
-from django_capture_on_commit_callbacks import capture_on_commit_callbacks
 
 from germanium import config
 
