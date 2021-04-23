@@ -20,7 +20,6 @@ setup(
         'selenium>=2.37.2',
         'nose>=1.3.6',
         'responses>=0.5.1',
-        'django-capture-on-commit-callbacks==1.4.0',
     ],
     include_package_data=True,
     zip_safe=False,
