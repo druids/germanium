@@ -32,6 +32,8 @@ def assert_qs_not_contains(qs, obj, msg=None):
     )
 
 
-def assert_equal_model_fields(model_instance, **field_values):
+def assert_equal_model_fields(instance, refresh_from_db=False, **field_values):
+    if refresh_from_db:
+        instance.refresh_from_db(fields=field_values.keys())
     for field_name, field_value in field_values.items():
-        assert_equal(getattr(model_instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name))
+        assert_equal(getattr(instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name))
