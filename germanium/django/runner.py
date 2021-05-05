@@ -5,7 +5,6 @@ from .utils import setup_databases
 
 class GermaniumRunnerMixin:
 
-
     def __init__(self, **kwargs):
         self.refreshdb = kwargs.pop('refreshdb', False)
         super().__init__(**kwargs)
