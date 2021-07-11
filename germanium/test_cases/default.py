@@ -1,9 +1,11 @@
 import types
+import os
 
 from django.conf import settings
 from django.test.testcases import TestCase, SimpleTestCase
 
 from germanium.config import TEST_ALL_DATABASES
+from germanium.storage import test_filesystems
 
 
 class GermaniumSimpleTestCaseMixin:
@@ -41,7 +43,8 @@ class GermaniumSimpleTestCaseMixin:
         self.tear_down()
 
     def tear_down(self):
-        pass
+        if os.getpid() in test_filesystems:
+            del test_filesystems[os.getpid()]
 
 
 class GermaniumTestCaseMixin(GermaniumSimpleTestCaseMixin):
