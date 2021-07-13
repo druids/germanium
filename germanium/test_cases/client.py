@@ -18,7 +18,7 @@ class ClientTestCaseMixin(AuthTestCaseMixin):
         self.c = Client()
         self.r_factory = RequestFactory()
         self.default_headers = {}
-        super(ClientTestCaseMixin, self).setUp()
+        super().setUp()
 
     def get_request_with_user(self, request):
         request.user = self.logged_user.user
