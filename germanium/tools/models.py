@@ -1,3 +1,6 @@
+from django.core.exceptions import ObjectDoesNotExist
+from django.db.models.constants import LOOKUP_SEP
+
 from .trivials import assert_equal, assert_true, assert_false
 
 
@@ -32,8 +35,28 @@ def assert_qs_not_contains(qs, obj, msg=None):
     )
 
 
+def model_instance_getattr(instance, key):
+    try:
+        return getattr(instance, key)
+    except ObjectDoesNotExist:
+        return None
+
+
+def get_value_from_model_instance(instance, field_name):
+    if LOOKUP_SEP in field_name:
+        current_field_name, next_field_name = field_name.split(LOOKUP_SEP, 1)
+        value = model_instance_getattr(instance, current_field_name)
+        if value is None:
+            raise AttributeError('Value cannot be get from instance')
+        return get_value_from_model_instance(value, next_field_name)
+    else:
+        return model_instance_getattr(instance, field_name)
+
+
 def assert_equal_model_fields(instance, refresh_from_db=False, **field_values):
     if refresh_from_db:
-        instance.refresh_from_db(fields=field_values.keys())
+        instance.refresh_from_db()
     for field_name, field_value in field_values.items():
-        assert_equal(getattr(instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name))
+        assert_equal(
+            get_value_from_model_instance(instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name)
+        )
