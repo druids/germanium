@@ -30,3 +30,23 @@ def assert_not_raises(exc_type, func=None, *args, **kwargs):
         yield None
     except exc_type:
         raise fail('{} raised'.format(exc_type.__name__))
+
+
+def assert_length_equal(iterable, expected_length, msg=None):
+    assert_equal(len(iterable), expected_length, msg)
+
+
+class AllEqual:
+
+    def __eq__(self, obj):
+        return True
+
+
+class NotNoneEqual:
+
+    def __eq__(self, obj):
+        return obj is not None
+
+
+all_eq_obj = AllEqual()
+not_none_eq_obj = NotNoneEqual()
