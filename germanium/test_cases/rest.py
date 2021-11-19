@@ -4,7 +4,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.test.client import MULTIPART_CONTENT
 
 from germanium import config
-from germanium.tools import assert_http_redirect, capture_on_commit_callbacks
+from germanium.tools import assert_http_redirect, capture_commit_callbacks
 
 from .client import ClientTestCaseMixin
 from .default import GermaniumTestCase, GermaniumSimpleTestCase
@@ -30,61 +30,66 @@ class RESTTestCaseMixin(ClientTestCaseMixin):
                                                           config.PASSWORD: password},
                                             content_type=MULTIPART_CONTENT))
 
-    def get(self, url, content_type=None, headers=None, execute_on_commit=False,
+    def get(self, url, content_type=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
             execute_on_commit_cascade=False):
         content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        with capture_on_commit_callbacks(execute=execute_on_commit, execute_cascade=execute_on_commit_cascade):
+        with capture_commit_callbacks(execute_pre_commit=execute_pre_commit, execute_on_commit=execute_on_commit,
+                                      execute_on_commit_cascade=execute_on_commit_cascade):
             resp = self.c.get(url, content_type=content_type, **headers)
         return resp
 
-    def put(self, url, data={}, content_type=None, headers=None, execute_on_commit=False,
+    def put(self, url, data={}, content_type=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
             execute_on_commit_cascade=False):
         content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        with capture_on_commit_callbacks(execute=execute_on_commit, execute_cascade=execute_on_commit_cascade):
+        with capture_commit_callbacks(execute_pre_commit=execute_pre_commit, execute_on_commit=execute_on_commit,
+                                      execute_on_commit_cascade=execute_on_commit_cascade):
             resp = self.c.put(url, data=self.serialize(data, content_type) if data is not None else data,
                               content_type=content_type, **headers)
         return resp
 
-    def post(self, url, data, content_type=None, headers=None, execute_on_commit=False,
+    def post(self, url, data, content_type=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
              execute_on_commit_cascade=False):
         content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        with capture_on_commit_callbacks(execute=execute_on_commit, execute_cascade=execute_on_commit_cascade):
+        with capture_commit_callbacks(execute_pre_commit=execute_pre_commit, execute_on_commit=execute_on_commit,
+                                      execute_on_commit_cascade=execute_on_commit_cascade):
             resp = self.c.post(url, data=self.serialize(data, content_type) if data is not None else data,
                                content_type=content_type, **headers)
         return resp
 
-    def patch(self, url, data, content_type=None, headers=None, execute_on_commit=False,
+    def patch(self, url, data, content_type=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
               execute_on_commit_cascade=False):
         content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        with capture_on_commit_callbacks(execute=execute_on_commit, execute_cascade=execute_on_commit_cascade):
+        with capture_commit_callbacks(execute_pre_commit=execute_pre_commit, execute_on_commit=execute_on_commit,
+                                      execute_on_commit_cascade=execute_on_commit_cascade):
             resp = self.c.patch(url, data=self.serialize(data, content_type) if data is not None else data,
                                 content_type=content_type, **headers)
         return resp
 
-    def delete(self, url, content_type=None, headers=None, execute_on_commit=False,
+    def delete(self, url, content_type=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
                execute_on_commit_cascade=False):
         content_type = content_type or JSON_CONTENT_TYPE
         headers = headers or {}
         headers['Accept'] = headers.get('Accept', content_type)
         headers.update(self.default_headers)
 
-        with capture_on_commit_callbacks(execute=execute_on_commit, execute_cascade=execute_on_commit_cascade):
+        with capture_commit_callbacks(execute_pre_commit=execute_pre_commit, execute_on_commit=execute_on_commit,
+                                      execute_on_commit_cascade=execute_on_commit_cascade):
             resp = self.c.delete(url, **headers)
         return resp
 
