@@ -13,7 +13,7 @@ from .default import GermaniumTestCase, GermaniumSimpleTestCase
 JSON_CONTENT_TYPE = 'application/json'
 
 
-class RESTTestCaseMixin(ClientTestCaseMixin):
+class RestTestCaseMixin(ClientTestCaseMixin):
 
     SERIALIZERS = {
         JSON_CONTENT_TYPE: lambda data: json.dumps(data, cls=DjangoJSONEncoder),
@@ -118,9 +118,9 @@ class RESTTestCaseMixin(ClientTestCaseMixin):
             return serializer(data)
 
 
-class RESTTestCase(RESTTestCaseMixin, GermaniumTestCase):
+class RestTestCase(RestTestCaseMixin, GermaniumTestCase):
     pass
 
 
-class SimpleRESTTestCase(RESTTestCaseMixin, GermaniumSimpleTestCase):
+class SimpleRestTestCase(RestTestCaseMixin, GermaniumSimpleTestCase):
     pass
