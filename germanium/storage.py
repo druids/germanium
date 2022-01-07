@@ -15,6 +15,8 @@ from django.utils import timezone
 
 from collections import defaultdict
 
+from germanium.signals import set_up, tear_down
+
 
 class PathDoesNotExist(Exception):
     pass
@@ -208,3 +210,12 @@ class TestInMemoryStorage(Storage):
 
     def __eq__(self, other):
         return self.filesystem == other.filesystem and self.base_url == other.base_url
+
+
+def clean_test_filesystem(sender, **kwargs):
+    if os.getpid() in test_filesystems:
+        del test_filesystems[os.getpid()]
+
+
+set_up.connect(clean_test_filesystem)
+tear_down.connect(clean_test_filesystem)

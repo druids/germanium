@@ -1,11 +1,10 @@
 import types
-import os
 
 from django.conf import settings
 from django.test.testcases import TestCase, SimpleTestCase
 
+from germanium.signals import set_up, set_up_class, tear_down, tear_down_class
 from germanium.config import TEST_ALL_DATABASES
-from germanium.storage import test_filesystems
 
 
 class GermaniumSimpleTestCaseMixin:
@@ -15,7 +14,8 @@ class GermaniumSimpleTestCaseMixin:
 
     @classmethod
     def setUpClass(cls):
-        super(GermaniumSimpleTestCaseMixin, cls).setUpClass()
+        set_up_class.send(sender=cls)
+        super().setUpClass()
         cls.set_up_class()
 
     @classmethod
@@ -24,7 +24,8 @@ class GermaniumSimpleTestCaseMixin:
 
     @classmethod
     def tearDownClass(cls):
-        super(GermaniumSimpleTestCaseMixin, cls).tearDownClass()
+        tear_down_class.send(sender=cls)
+        super().tearDownClass()
         cls.tear_down_class()
 
     @classmethod
@@ -32,19 +33,20 @@ class GermaniumSimpleTestCaseMixin:
         pass
 
     def setUp(self):
-        super(GermaniumSimpleTestCaseMixin, self).setUp()
+        set_up.send(sender=self.__class__)
+        super().setUp()
         self.set_up()
 
     def set_up(self):
         pass
 
     def tearDown(self):
-        super(GermaniumSimpleTestCaseMixin, self).tearDown()
+        tear_down.send(sender=self.__class__)
+        super().tearDown()
         self.tear_down()
 
     def tear_down(self):
-        if os.getpid() in test_filesystems:
-            del test_filesystems[os.getpid()]
+        pass
 
 
 class GermaniumTestCaseMixin(GermaniumSimpleTestCaseMixin):
