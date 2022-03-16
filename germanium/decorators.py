@@ -67,6 +67,24 @@ def is_multiple_data(data):
     return is_iterable(data) and all(is_iterable(sub_data) or isinstance(sub_data, NamedTestData) for sub_data in data)
 
 
+def fill_data_with_source(data, named_data):
+    if not named_data:
+        return data
+    if isinstance(data, dict):
+        return {k: fill_data_with_source(v, named_data) for k, v in data.items()}
+    elif isinstance(data, (list, tuple, set)):
+        return type(data)(
+            (fill_data_with_source(v, named_data) for v in data)
+        )
+    elif isinstance(data, NamedDataSource):
+        try:
+            return named_data.get(data.name)
+        except KeyError:
+            raise AttributeError(f'Source data "{data.name}" was not found in named data')
+    else:
+        return data
+
+
 class NamedTestData:
 
     def __init__(self, **kwargs):
@@ -76,22 +94,42 @@ class NamedTestData:
     def default(self):
         return list(self.data.items())[0][1]
 
+    def rename_data(self, name):
+        assert len(self.data) == 1, 'Output name cannot be used if data provider returns more than one result'
+        self.data = {name: next(iter(self.data.values()))}
+
     def get(self, k):
         return self.data[k]
 
     def __getattr__(self, item):
         if item in self.data:
-            return self.get(item)
+            return self.data[item]
         raise AttributeError('NamedTestData object has no attribute "%s"'.format(item))
 
 
+class NamedDataSource:
+
+    def __init__(self, name):
+        self.name = name
+
+
 def data_provider(function=None, name=None):
+    """
+    Data provider decorator which prepare data for tests. Data provider should return NamedTestData or name property
+    should be set.
+    Args:
+        function: data provider function or method
+        name: name of returned test data
+
+    Returns:
+        NamedTestData object
+    """
 
     def _data_provider(function):
-        def _decorator(self, *args, **kwargs):
+        def _decorator(*args, **kwargs):
             return_named_data = kwargs.pop('return_named_data', False)
             returned_data_name = kwargs.pop('returned_data_name', None)
-            data = function(self, *args, **kwargs)
+            data = function(*args, **kwargs)
             if return_named_data:
                 if not isinstance(data, NamedTestData) and name:
                     data = NamedTestData(**{name: data})
@@ -164,8 +202,19 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
 
 
 def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provider_kwargs):
-    """Data provider decorator, allows another callable to provide the data for the test"""
+    """
+    Data provider decorator, allows another callable to provide the data for the test
+    Args:
+        callable_or_property_or_str: data provider function/method or string name of the data provider method of
+                                     the test case class
+        *data_provider_args: arguments for the data provider
+        **data_provider_kwargs: arguments for the data provider kwargs
 
+    Returns:
+        Data created by data provider
+    """
+
+    output_name = data_provider_kwargs.pop('_output_name', None)
     def test_decorator(fn):
         def get_data(self, last_data, named_data=None):
             last_args = last_data if last_data else ()
@@ -179,10 +228,24 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
                 if isinstance(callable_or_property_or_str, str) else callable_or_property_or_str
             )
 
+
             if ismethod(callable_or_property) or isclass(callable_or_property) or isfunction(callable_or_property):
                 if getattr(callable_or_property, 'is_data_provider', False):
                     data_provider_kwargs['return_named_data'] = True
-                return call(callable_or_property, self, last_args, named_data, data_provider_args, data_provider_kwargs)
+                data = call(
+                    callable_or_property,
+                    self,
+                    last_args,
+                    named_data,
+                    fill_data_with_source(data_provider_args, named_data),
+                    fill_data_with_source(data_provider_kwargs, named_data)
+                )
+                if output_name:
+                    assert isinstance(data, NamedTestData), 'Data provider must return named data to use output_name'
+                    data.rename_data(output_name)
+                    return data
+                else:
+                    return data
             else:
                 return [list(last_args) + list(val if is_iterable(val) else [val]) for val in callable_or_property]
 
