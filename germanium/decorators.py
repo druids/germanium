@@ -1,3 +1,5 @@
+import types
+
 import collections
 from functools import wraps
 
@@ -63,10 +65,6 @@ def login_all(cls=None, **user_kwargs):
     return _login_all
 
 
-def is_multiple_data(data):
-    return is_iterable(data) and all(is_iterable(sub_data) or isinstance(sub_data, NamedTestData) for sub_data in data)
-
-
 def fill_data_with_source(data, named_data):
     if not named_data:
         return data
@@ -94,17 +92,13 @@ class NamedTestData:
     def default(self):
         return list(self.data.items())[0][1]
 
-    def rename_data(self, name):
-        assert len(self.data) == 1, 'Output name cannot be used if data provider returns more than one result'
-        self.data = {name: next(iter(self.data.values()))}
-
     def get(self, k):
         return self.data[k]
 
     def __getattr__(self, item):
         if item in self.data:
             return self.data[item]
-        raise AttributeError('NamedTestData object has no attribute "%s"'.format(item))
+        raise AttributeError(f'NamedTestData object has no attribute "{item}"')
 
 
 class NamedDataSource:
@@ -165,7 +159,10 @@ def call(callable, self, data, named_data=None, default_args=None, default_kwarg
 
     if named_data:
         function_or_method_kwargs.update(
-            {k: v for k, v in named_data.data.items() if k in signature(callable).parameters}
+            {
+                k: v for k, v in named_data.data.items()
+                if k in signature(callable).parameters and k not in function_or_method_kwargs
+            }
         )
         return callable(*function_or_method_args, **function_or_method_kwargs)
     else:
@@ -201,6 +198,24 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
             self.tear_down_data_consumer()
 
 
+def _rename_output_data(data, name):
+    if not name:
+        return data
+
+    if isinstance(name, list):
+        assert isinstance(data, (list, tuple, set, NamedTestData)), \
+            'Ouput data must be iterable if more output names are set'
+        names = name
+        values = list(data.data.values()) if isinstance(data, NamedTestData) else list(data)
+    else:
+        names = [name]
+        values = list(data.data.values()) if isinstance(data, NamedTestData) else [data]
+
+    assert len(names) <= len(values), 'More output names than returned values'
+
+    return NamedTestData(**{k: v for k, v in zip(names, values)})
+
+
 def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provider_kwargs):
     """
     Data provider decorator, allows another callable to provide the data for the test
@@ -228,7 +243,6 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
                 if isinstance(callable_or_property_or_str, str) else callable_or_property_or_str
             )
 
-
             if ismethod(callable_or_property) or isclass(callable_or_property) or isfunction(callable_or_property):
                 if getattr(callable_or_property, 'is_data_provider', False):
                     data_provider_kwargs['return_named_data'] = True
@@ -240,22 +254,24 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
                     fill_data_with_source(data_provider_args, named_data),
                     fill_data_with_source(data_provider_kwargs, named_data)
                 )
-                if output_name:
-                    assert isinstance(data, NamedTestData), 'Data provider must return named data to use output_name'
-                    data.rename_data(output_name)
-                    return data
-                else:
-                    return data
             else:
-                return [list(last_args) + list(val if is_iterable(val) else [val]) for val in callable_or_property]
+                assert isinstance(callable_or_property, (list, tuple, set, types.GeneratorType)), (
+                    'Only list, tuple, set, generator, function or method can be used with data_consumer'
+                )
+                data = callable_or_property
+
+            if isinstance(data, (list, tuple, set, types.GeneratorType)):
+                for value in data:
+                    value = _rename_output_data(value, output_name)
+                    if not isinstance(value, NamedTestData):
+                        value = list(last_args) + (list(value) if isinstance(value, (list, tuple, set)) else [value])
+                    yield value, True
+            else:
+                yield _rename_output_data(data, output_name), False
 
         def repl(self, data=None, named_data=None):
-            data = get_data(self, data, named_data)
-            if is_multiple_data(data):
-                for sub_data in data:
-                    call_test_method(fn, self, sub_data, named_data, use_rollback=True)
-            else:
-                call_test_method(fn, self, data, named_data, use_rollback=False)
+            for data, use_rollback in get_data(self, data, named_data):
+                call_test_method(fn, self, data, named_data, use_rollback=use_rollback)
 
         wrapper = wraps(fn)(repl)
         wrapper.is_data_consumer = True
