@@ -69,7 +69,7 @@ def fill_data_with_source(data, named_data):
     if not named_data:
         return data
     if isinstance(data, dict):
-        return {k: fill_data_with_source(v, named_data) for k, v in data.items()}
+        return {fill_data_with_source(k, named_data): fill_data_with_source(v, named_data) for k, v in data.items()}
     elif isinstance(data, (list, tuple, set)):
         return type(data)(
             (fill_data_with_source(v, named_data) for v in data)
