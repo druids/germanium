@@ -198,6 +198,12 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
             self.tear_down_data_consumer()
 
 
+def _copy_named_data(named_data):
+    if named_data is None:
+        return named_data
+    return NamedTestData(**named_data.data)
+
+
 def _rename_output_data(data, name):
     if not name:
         return data
@@ -271,7 +277,7 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
 
         def repl(self, data=None, named_data=None):
             for data, use_rollback in get_data(self, data, named_data):
-                call_test_method(fn, self, data, named_data, use_rollback=use_rollback)
+                call_test_method(fn, self, data, _copy_named_data(named_data), use_rollback=use_rollback)
 
         wrapper = wraps(fn)(repl)
         wrapper.is_data_consumer = True
