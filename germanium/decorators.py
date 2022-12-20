@@ -1,6 +1,6 @@
 import types
 
-import collections
+from collections.abc import Iterable
 from functools import wraps
 
 from inspect import isclass, isfunction, ismethod, getfullargspec, signature
@@ -13,7 +13,7 @@ from django.utils.functional import cached_property
 
 
 def is_iterable(data):
-    return isinstance(data, collections.Iterable) and not isinstance(data, str)
+    return isinstance(data, Iterable) and not isinstance(data, str)
 
 
 def refresh_model_object(obj):
