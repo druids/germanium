@@ -45,7 +45,7 @@ def assert_valid_JSON_created_response(resp, msg=None):
     assert_valid_JSON(resp.content, msg)
 
 
-def assert_keys(data, expected):
+def assert_keys(data, expected, msg=None):
     """
     This method ensures that the keys of the ``data`` match up to the keys of
     ``expected``.
@@ -54,4 +54,4 @@ def assert_keys(data, expected):
     a response match up to what is expected. This is typically less fragile than
     testing the full structure, which can be prone to data changes.
     """
-    assert_equal(set(data.keys()), set(expected))
+    assert_equal(set(data.keys()), set(expected), msg)

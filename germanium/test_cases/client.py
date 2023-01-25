@@ -41,9 +41,10 @@ class ClientTestCaseMixin(AuthTestCaseMixin):
             resp = self.c.get(url, **headers)
         return resp
 
-    def put(self, url, data={}, headers=None, execute_pre_commit=True, execute_on_commit=False,
+    def put(self, url, data=None, headers=None, execute_pre_commit=True, execute_on_commit=False,
             execute_on_commit_cascade=False):
         headers = headers or {}
+        data = data or {}
         headers.update(self.default_headers)
 
         if execute_on_commit:

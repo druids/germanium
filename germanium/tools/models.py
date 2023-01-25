@@ -15,12 +15,12 @@ def assert_iterable_equal(first, second, msg=None):
     assert_equal(set(first), set(second), msg)
 
 
-def assert_qs_exists(qs):
-    assert_true(qs.exists())
+def assert_qs_exists(qs, msg=None):
+    assert_true(qs.exists(), msg)
 
 
-def assert_qs_not_exists(qs):
-    assert_false(qs.exists())
+def assert_qs_not_exists(qs, msg=None):
+    assert_false(qs.exists(), msg)
 
 
 def assert_qs_contains(qs, obj, msg=None):
