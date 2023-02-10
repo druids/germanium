@@ -1,7 +1,5 @@
 import json
 
-from django.utils.encoding import force_text
-
 from .trivials import assert_true, assert_equal, assert_in, fail
 from .http import assert_http_ok, assert_http_created
 
@@ -12,7 +10,7 @@ def assert_valid_JSON(data, msg='Json is not valid'):
     can be loaded properly.
     """
     try:
-        json.loads(force_text(data))
+        json.loads(str(data))
     except:
         fail(msg)
 
