@@ -1,12 +1,10 @@
 from urllib.parse import urlencode
 
-from django.utils.encoding import force_text
-
 from .trivials import assert_equal, assert_in
 
 
 def get_full_path(*paths):
-    string_paths = (force_text(path) for path in paths)
+    string_paths = (str(path) for path in paths)
     full_path = '/'.join((path[:-1] if path.endswith('/') else path for path in string_paths))
     return full_path if full_path.endswith('/') else full_path + '/'
 
