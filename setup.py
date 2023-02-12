@@ -16,11 +16,11 @@ setup(
     ],
     install_requires=[
         'django>=2.2',
-        'PyVirtualDisplay>=0.1.2',
-        'selenium>=2.37.2',
-        'nose>=1.3.6',
-        'responses>=0.5.1',
+        'nose>=1.3.7',
     ],
+    extras_require={
+        'selenium': ['selenium>=2.37.2', 'PyVirtualDisplay>=0.1.2']
+    },
     include_package_data=True,
     zip_safe=False,
 )
