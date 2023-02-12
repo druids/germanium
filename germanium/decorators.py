@@ -5,11 +5,19 @@ from functools import wraps
 
 from inspect import isclass, isfunction, ismethod, getfullargspec, signature
 
-import responses
 from django.db import transaction
 from django.db.models import Model
 from django.db.models.fields import DateField, DateTimeField
 from django.utils.functional import cached_property
+
+try:
+    import responses
+
+    def reset_responses():
+        responses.reset()
+except ImportError:
+    def reset_responses():
+        pass
 
 
 def is_iterable(data):
@@ -190,7 +198,7 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
     finally:
         if use_rollback:
             transaction.savepoint_rollback(sid)
-            responses.reset()
+            reset_responses()
             refresh_model_objects(
                 *(data.data.values() if isinstance(data, NamedTestData) else data)
             )
