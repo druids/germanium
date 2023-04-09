@@ -154,6 +154,7 @@ class InMemoryDir(InMemoryNode):
 
 
 test_filesystems = defaultdict(lambda: defaultdict(InMemoryDir))
+test_storages = []
 
 
 @deconstructible
@@ -168,6 +169,7 @@ class TestInMemoryStorage(Storage):
         if base_url is None:
             base_url = settings.MEDIA_URL
         self.base_url = base_url
+        test_storages.append(self)
 
     @property
     def filesystem(self):
@@ -211,11 +213,29 @@ class TestInMemoryStorage(Storage):
     def __eq__(self, other):
         return self.filesystem == other.filesystem and self.base_url == other.base_url
 
+    def load_fixtures(self):
+        """
+        Loads fixtures into the filesystem.
+        """
+        for fixture_dir in settings.FIXTURE_DIRS:
+            fixture_dir = os.path.join(fixture_dir, self.filesystem_name)
+            for (root, dirs, files) in os.walk(fixture_dir):
+                for file in files:
+                    full_file_path = os.path.join(root, *dirs, file)
+                    with open(full_file_path, 'rb') as f:
+                        self.save(os.path.relpath(full_file_path, fixture_dir), f)
+
 
 def clean_test_filesystem(sender, **kwargs):
     if os.getpid() in test_filesystems:
         del test_filesystems[os.getpid()]
 
 
+def load_fixtures(sender, **kwargs):
+    for test_storage in test_storages:
+        test_storage.load_fixtures()
+
+
 set_up.connect(clean_test_filesystem)
+set_up.connect(load_fixtures)
 tear_down.connect(clean_test_filesystem)
