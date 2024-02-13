@@ -83,10 +83,7 @@ def fill_data_with_source(data, named_data):
             (fill_data_with_source(v, named_data) for v in data)
         )
     elif isinstance(data, NamedDataSource):
-        try:
-            return named_data.get(data.name)
-        except KeyError:
-            raise AttributeError(f'Source data "{data.name}" was not found in named data')
+        return data.get_from_named_data(named_data)
     else:
         return data
 
@@ -113,6 +110,20 @@ class NamedDataSource:
 
     def __init__(self, name):
         self.name = name
+
+    def get_from_named_data(self, named_data):
+        keys = self.name.split('.')
+
+        try:
+            def get_value(data, keys):
+                if not keys:
+                    return data
+                value = getattr(data, keys[0])
+                return get_value(value, keys[1:])
+
+            return get_value(named_data.get(keys[0]), keys[1:])
+        except (KeyError, AttributeError):
+            raise AttributeError(f'Source data "{data.name}" was not found in named data')
 
 
 def data_provider(function=None, name=None):
