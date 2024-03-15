@@ -111,4 +111,6 @@ def test_call_command(command, *args,  **kwargs):
         stdout_output = StringIO()
         stderr_output = StringIO()
         call_command(command, stdout=stdout_output, stderr=stderr_output, *args, **kwargs)
+        stdout_output.seek(0)
+        stderr_output.seek(0)
     return stdout_output, stderr_output
