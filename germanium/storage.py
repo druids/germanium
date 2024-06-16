@@ -221,7 +221,7 @@ class TestInMemoryStorage(Storage):
             fixture_dir = os.path.join(fixture_dir, self.filesystem_name)
             for (root, dirs, files) in os.walk(fixture_dir):
                 for file in files:
-                    full_file_path = os.path.join(root, *dirs, file)
+                    full_file_path = os.path.join(root, file)
                     with open(full_file_path, 'rb') as f:
                         self.save(os.path.relpath(full_file_path, fixture_dir), f)
 
