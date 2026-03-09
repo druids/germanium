@@ -6,9 +6,9 @@ class ModelTestCase(GermaniumTestCase):
     factory_class = None
 
     def inst_data_provider(self, **inst_kwargs):
-        factory_class = inst_kwargs.pop('factory_class', self.factory_class)
-        if 'pk' in inst_kwargs:
-            inst = factory_class._meta.model.objects.get(pk=inst_kwargs.get('pk'))
+        factory_class = inst_kwargs.pop("factory_class", self.factory_class)
+        if "pk" in inst_kwargs:
+            inst = factory_class._meta.model.objects.get(pk=inst_kwargs.get("pk"))
         else:
             inst = factory_class(**inst_kwargs)
         return inst

@@ -51,8 +51,8 @@ class GermaniumSimpleTestCaseMixin:
 
 class GermaniumTestCaseMixin(GermaniumSimpleTestCaseMixin):
 
-    if getattr(settings, 'GERMANIUM_FIXTURES', None):
-        fixtures = getattr(settings, 'GERMANIUM_FIXTURES', None)
+    if getattr(settings, "GERMANIUM_FIXTURES", None):
+        fixtures = getattr(settings, "GERMANIUM_FIXTURES", None)
 
 
 class GermaniumTestCase(GermaniumTestCaseMixin, TestCase):

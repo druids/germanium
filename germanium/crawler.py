@@ -7,8 +7,7 @@ from html.parser import HTMLParser
 
 from django.conf import settings
 
-
-LOG = logging.getLogger('tests')
+LOG = logging.getLogger("tests")
 
 
 class LinkExtractor:
@@ -25,7 +24,7 @@ class DummyLinkExtractor(LinkExtractor):
 
 class HTMLLinkExtractor(LinkExtractor):
 
-    link_attr_names = ('href', 'src')
+    link_attr_names = ("href", "src")
 
     def extract(self, content):
         link_attr_names = self.link_attr_names
@@ -34,9 +33,7 @@ class HTMLLinkExtractor(LinkExtractor):
             links = set()
 
             def handle_starttag(self, tag, attrs):
-                self.links.update(
-                    v for k, v in attrs if k in link_attr_names
-                )
+                self.links.update(v for k, v in attrs if k in link_attr_names)
 
         parser = SaxLinkExtractor()
         parser.feed(content)
@@ -73,8 +70,15 @@ class URLWithReferer:
 
 class Crawler:
 
-    def __init__(self, client, base_urls=None, exclude_urls=None, pre_request=None, post_response=None,
-                 extra_link_extractors=None):
+    def __init__(
+        self,
+        client,
+        base_urls=None,
+        exclude_urls=None,
+        pre_request=None,
+        post_response=None,
+        extra_link_extractors=None,
+    ):
         self.client = client
         self.urls = set()
         if base_urls:
@@ -86,12 +90,14 @@ class Crawler:
         self.pre_request = pre_request
         self.post_response = post_response
         self.link_extractors = {
-            'text/html': HTMLLinkExtractor(),
-            'default': DummyLinkExtractor(),
+            "text/html": HTMLLinkExtractor(),
+            "default": DummyLinkExtractor(),
         }
         if extra_link_extractors:
             self.link_extractors.update(extra_link_extractors)
-        self.excluded_urls_regexs = [re.compile(r'^{}$'.format(url)) for url in self.exclude_urls]
+        self.excluded_urls_regexs = [
+            re.compile(r"^{}$".format(url)) for url in self.exclude_urls
+        ]
 
     def run(self):
         while self.urls:
@@ -99,28 +105,34 @@ class Crawler:
 
     def _parse_urls(self, url, resp):
         returned_urls = []
-        content_type = resp['Content-Type'].split(';')[0]
+        content_type = resp["Content-Type"].split(";")[0]
         if content_type in self.link_extractors:
             content = resp.content
-            if 'utf-8' in resp['Content-Type']:
-                content = content.decode('utf-8')
+            if "utf-8" in resp["Content-Type"]:
+                content = content.decode("utf-8")
 
-            for link in self.link_extractors.get(content_type, self.link_extractors['default']).extract(content):
+            for link in self.link_extractors.get(
+                content_type, self.link_extractors["default"]
+            ).extract(content):
                 parsed_href = urlparse(link)
 
                 if not parsed_href.path:
                     continue
 
-                if parsed_href.scheme and not parsed_href.netloc.startswith('testserver'):
-                    LOG.debug('Skipping external link: %s', link)
+                if parsed_href.scheme and not parsed_href.netloc.startswith(
+                    "testserver"
+                ):
+                    LOG.debug("Skipping external link: %s", link)
                     continue
 
-                if ('django.contrib.staticfiles' in settings.INSTALLED_APPS
-                        and parsed_href.path.startswith(settings.STATIC_URL)):
-                    LOG.debug('Skipping static file %s', parsed_href.path)
+                if (
+                    "django.contrib.staticfiles" in settings.INSTALLED_APPS
+                    and parsed_href.path.startswith(settings.STATIC_URL)
+                ):
+                    LOG.debug("Skipping static file %s", parsed_href.path)
                 elif parsed_href.path.startswith(settings.MEDIA_URL):
-                    LOG.debug('Skipping media file %s', parsed_href.path)
-                elif parsed_href.path.startswith('/'):
+                    LOG.debug("Skipping media file %s", parsed_href.path)
+                elif parsed_href.path.startswith("/"):
                     returned_urls.append(link)
                 else:
                     # We'll use urlparse's urljoin since that handles things like <a href="../foo">
@@ -146,13 +158,20 @@ class Crawler:
             resp = self.client.get(url, follow=True, **headers)
             self.crawled_urls.add(url)
             if resp.redirect_chain:
-                self.crawled_urls.update((redirect_url for redirect_url, _ in resp.redirect_chain))
+                self.crawled_urls.update(
+                    (redirect_url for redirect_url, _ in resp.redirect_chain)
+                )
             for parsed_url in self._parse_urls(url, resp):
-                if (parsed_url not in self.crawled_urls and parsed_url not in self.urls and
-                        not any(excluded_urls_regex.match(parsed_url)
-                                for excluded_urls_regex in self.excluded_urls_regexs)):
+                if (
+                    parsed_url not in self.crawled_urls
+                    and parsed_url not in self.urls
+                    and not any(
+                        excluded_urls_regex.match(parsed_url)
+                        for excluded_urls_regex in self.excluded_urls_regexs
+                    )
+                ):
                     self.urls.add(URLWithReferer(parsed_url, url))
             self._post_response(url, referer, resp)
         except Exception as e:
-            LOG.exception('%s had unhandled exception: %s', url, e)
+            LOG.exception("%s had unhandled exception: %s", url, e)
             self._post_response(url, referer, resp, e)

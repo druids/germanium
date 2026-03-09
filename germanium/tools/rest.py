@@ -4,7 +4,7 @@ from .trivials import assert_true, assert_equal, assert_in, fail
 from .http import assert_http_ok, assert_http_created
 
 
-def assert_valid_JSON(data, msg='Json is not valid'):
+def assert_valid_JSON(data, msg="Json is not valid"):
     """
     Given the provided ``data`` as a string, ensures that it is valid JSON &
     can be loaded properly.
@@ -25,7 +25,7 @@ def assert_valid_JSON_response(resp, msg=None):
     * The content is valid JSON
     """
     assert_http_ok(resp, msg)
-    assert_true(resp['Content-Type'].startswith('application/json'), msg)
+    assert_true(resp["Content-Type"].startswith("application/json"), msg)
     assert_valid_JSON(resp.content, msg)
 
 
@@ -39,7 +39,7 @@ def assert_valid_JSON_created_response(resp, msg=None):
     * The content is valid JSON
     """
     assert_http_created(resp, msg)
-    assert_true(resp['Content-Type'].startswith('application/json'), msg)
+    assert_true(resp["Content-Type"].startswith("application/json"), msg)
     assert_valid_JSON(resp.content, msg)
 
 

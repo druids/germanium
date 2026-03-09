@@ -15,7 +15,9 @@ try:
 
     def reset_responses():
         responses.reset()
+
 except ImportError:
+
     def reset_responses():
         pass
 
@@ -35,7 +37,7 @@ def refresh_model_objects(*data):
     [refresh_model_object(obj) for obj in data if isinstance(obj, Model) and obj.pk]
 
 
-def login(function=None, users_generator='get_user', **users_kwargs):
+def login(function=None, users_generator="get_user", **users_kwargs):
     """Login decorator usage: @login(user_data)"""
 
     def _login(function):
@@ -52,6 +54,7 @@ def login(function=None, users_generator='get_user', **users_kwargs):
                 self.login(user)
                 function(self, *args, **kwargs)
                 self.logout()
+
         return wraps(function)(_decorator)
 
     if function:
@@ -77,11 +80,12 @@ def fill_data_with_source(data, named_data):
     if not named_data:
         return data
     if isinstance(data, dict):
-        return {fill_data_with_source(k, named_data): fill_data_with_source(v, named_data) for k, v in data.items()}
+        return {
+            fill_data_with_source(k, named_data): fill_data_with_source(v, named_data)
+            for k, v in data.items()
+        }
     elif isinstance(data, (list, tuple, set)):
-        return type(data)(
-            (fill_data_with_source(v, named_data) for v in data)
-        )
+        return type(data)((fill_data_with_source(v, named_data) for v in data))
     elif isinstance(data, NamedDataSource):
         return data.get_from_named_data(named_data)
     else:
@@ -112,9 +116,10 @@ class NamedDataSource:
         self.name = name
 
     def get_from_named_data(self, named_data):
-        keys = self.name.split('.')
+        keys = self.name.split(".")
 
         try:
+
             def get_value(data, keys):
                 if not keys:
                     return data
@@ -123,7 +128,9 @@ class NamedDataSource:
 
             return get_value(named_data.get(keys[0]), keys[1:])
         except (KeyError, AttributeError):
-            raise AttributeError(f'Source data "{data.name}" was not found in named data')
+            raise AttributeError(
+                f'Source data "{data.name}" was not found in named data'
+            )
 
 
 def data_provider(function=None, name=None):
@@ -140,8 +147,8 @@ def data_provider(function=None, name=None):
 
     def _data_provider(function):
         def _decorator(*args, **kwargs):
-            return_named_data = kwargs.pop('return_named_data', False)
-            returned_data_name = kwargs.pop('returned_data_name', None)
+            return_named_data = kwargs.pop("return_named_data", False)
+            returned_data_name = kwargs.pop("returned_data_name", None)
             data = function(*args, **kwargs)
             if return_named_data:
                 if not isinstance(data, NamedTestData) and name:
@@ -159,6 +166,7 @@ def data_provider(function=None, name=None):
                     return data.get(name)
                 else:
                     return data.default
+
         wrapper = wraps(function)(_decorator)
         wrapper.is_data_provider = True
         return wrapper
@@ -173,14 +181,16 @@ def call(callable, self, data, named_data=None, default_args=None, default_kwarg
     function_or_method_kwargs = {} if default_kwargs is None else dict(**default_kwargs)
     function_or_method_args = [] if default_args is None else list(default_args)
 
-    if 'self' in signature(callable).parameters:
+    if "self" in signature(callable).parameters:
         function_or_method_args.insert(0, self)
 
     if named_data:
         function_or_method_kwargs.update(
             {
-                k: v for k, v in named_data.data.items()
-                if k in signature(callable).parameters and k not in function_or_method_kwargs
+                k: v
+                for k, v in named_data.data.items()
+                if k in signature(callable).parameters
+                and k not in function_or_method_kwargs
             }
         )
         return callable(*function_or_method_args, **function_or_method_kwargs)
@@ -196,24 +206,27 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
     elif named_data and not isinstance(data, NamedTestData):
         named_data = None
 
-    is_data_consumer = getattr(method, 'is_data_consumer', False)
+    databases = list(self.databases) if self.databases else []
+    is_data_consumer = getattr(method, "is_data_consumer", False)
+    sids = []
     if use_rollback:
-        sid = transaction.savepoint()
+        sids = [transaction.savepoint(using=db) for db in databases]
     try:
         if is_data_consumer:
             method(self, data=data, named_data=named_data)
         else:
-            if hasattr(self, 'set_up_data_consumer'):
+            if hasattr(self, "set_up_data_consumer"):
                 self.tear_up_data_consumer()
             call(method, self, ((data,) if not is_iterable(data) else data), named_data)
     finally:
         if use_rollback:
-            transaction.savepoint_rollback(sid)
+            for sid, db in zip(sids, databases):
+                transaction.savepoint_rollback(sid, using=db)
             reset_responses()
             refresh_model_objects(
                 *(data.data.values() if isinstance(data, NamedTestData) else data)
             )
-        if not is_data_consumer and hasattr(self, 'tear_down_data_consumer'):
+        if not is_data_consumer and hasattr(self, "tear_down_data_consumer"):
             self.tear_down_data_consumer()
 
 
@@ -228,20 +241,25 @@ def _rename_output_data(data, name):
         return data
 
     if isinstance(name, list):
-        assert isinstance(data, (list, tuple, set, NamedTestData)), \
-            'Ouput data must be iterable if more output names are set'
+        assert isinstance(
+            data, (list, tuple, set, NamedTestData)
+        ), "Ouput data must be iterable if more output names are set"
         names = name
-        values = list(data.data.values()) if isinstance(data, NamedTestData) else list(data)
+        values = (
+            list(data.data.values()) if isinstance(data, NamedTestData) else list(data)
+        )
     else:
         names = [name]
         values = list(data.data.values()) if isinstance(data, NamedTestData) else [data]
 
-    assert len(names) <= len(values), 'More output names than returned values'
+    assert len(names) <= len(values), "More output names than returned values"
 
     return NamedTestData(**{k: v for k, v in zip(names, values)})
 
 
-def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provider_kwargs):
+def data_consumer(
+    callable_or_property_or_str, *data_provider_args, **data_provider_kwargs
+):
     """
     Data provider decorator, allows another callable to provide the data for the test
     Args:
@@ -254,7 +272,8 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
         Data created by data provider
     """
 
-    output_name = data_provider_kwargs.pop('_output_name', None)
+    output_name = data_provider_kwargs.pop("_output_name", None)
+
     def test_decorator(fn):
         def get_data(self, last_data, named_data=None):
             last_args = last_data if last_data else ()
@@ -265,44 +284,60 @@ def data_consumer(callable_or_property_or_str, *data_provider_args, **data_provi
 
             callable_or_property = (
                 getattr(self, callable_or_property_or_str)
-                if isinstance(callable_or_property_or_str, str) else callable_or_property_or_str
+                if isinstance(callable_or_property_or_str, str)
+                else callable_or_property_or_str
             )
 
-            if ismethod(callable_or_property) or isclass(callable_or_property) or isfunction(callable_or_property):
-                if getattr(callable_or_property, 'is_data_provider', False):
-                    data_provider_kwargs['return_named_data'] = True
+            if (
+                ismethod(callable_or_property)
+                or isclass(callable_or_property)
+                or isfunction(callable_or_property)
+            ):
+                if getattr(callable_or_property, "is_data_provider", False):
+                    data_provider_kwargs["return_named_data"] = True
                 data = call(
                     callable_or_property,
                     self,
                     last_args,
                     named_data,
                     fill_data_with_source(data_provider_args, named_data),
-                    fill_data_with_source(data_provider_kwargs, named_data)
+                    fill_data_with_source(data_provider_kwargs, named_data),
                 )
             else:
-                assert isinstance(callable_or_property, (list, tuple, set, types.GeneratorType)), (
-                    'Only list, tuple, set, generator, function or method can be used with data_consumer'
-                )
+                assert isinstance(
+                    callable_or_property, (list, tuple, set, types.GeneratorType)
+                ), "Only list, tuple, set, generator, function or method can be used with data_consumer"
                 data = callable_or_property
 
             if isinstance(data, (list, tuple, set, types.GeneratorType)):
                 for value in data:
                     value = _rename_output_data(value, output_name)
                     if not isinstance(value, NamedTestData):
-                        value = list(last_args) + (list(value) if isinstance(value, (list, tuple, set)) else [value])
+                        value = list(last_args) + (
+                            list(value)
+                            if isinstance(value, (list, tuple, set))
+                            else [value]
+                        )
                     yield value, True
             else:
                 yield _rename_output_data(data, output_name), False
 
         def repl(self, data=None, named_data=None):
             for data, use_rollback in get_data(self, data, named_data):
-                call_test_method(fn, self, data, _copy_named_data(named_data), use_rollback=use_rollback)
+                call_test_method(
+                    fn,
+                    self,
+                    data,
+                    _copy_named_data(named_data),
+                    use_rollback=use_rollback,
+                )
 
         wrapper = wraps(fn)(repl)
         wrapper.is_data_consumer = True
         wrapper.get_data = get_data
         wrapper.fn = fn
         return wrapper
+
     return test_decorator
 
 
@@ -312,9 +347,13 @@ def turn_off_auto_now(model_class, field_name):
         def _decorator(self, *args, **kwargs):
             field = model_class._meta.get_field(field_name)
             if not isinstance(field, (DateField, DateTimeField)):
-                raise RuntimeError('Field %s must be DateField or DateTimeField type') % field_name
+                raise RuntimeError(
+                    "Field %s must be DateField or DateTimeField type"
+                ) % field_name
             if not field.auto_now:
-                raise RuntimeError('Field %s must have set auto_no to True') % field_name
+                raise RuntimeError(
+                    "Field %s must have set auto_no to True"
+                ) % field_name
             field.auto_now = False
             try:
                 function(self, *args, **kwargs)
@@ -322,6 +361,7 @@ def turn_off_auto_now(model_class, field_name):
                 raise
             finally:
                 field.auto_now = True
+
         return wraps(function)(_decorator)
 
     return _turn_off_auto_now

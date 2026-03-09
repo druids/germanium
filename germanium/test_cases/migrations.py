@@ -8,18 +8,23 @@ class MigrationTestCase(GermaniumTestCase):
 
     @property
     def app(self):
-        return self.strip_module_suffix(apps.get_containing_app_config(type(self).__module__).name)
+        return self.strip_module_suffix(
+            apps.get_containing_app_config(type(self).__module__).name
+        )
 
     def strip_module_suffix(self, module):
-        return module.split('.')[-1]
+        return module.split(".")[-1]
 
     migrate_from = None
     migrate_to = None
 
     def setUp(self):
         super().setUp()
-        assert self.migrate_from and self.migrate_to, (
-            "TestCase '{}' must define migrate_from and migrate_to properties".format(type(self).__name__))
+        assert (
+            self.migrate_from and self.migrate_to
+        ), "TestCase '{}' must define migrate_from and migrate_to properties".format(
+            type(self).__name__
+        )
         migrate_from = [(self.app, self.migrate_from)]
         migrate_to = [(self.app, self.migrate_to)]
         executor = MigrationExecutor(connection)

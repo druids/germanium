@@ -1,4 +1,3 @@
-
 def patch_broken_pipe_error():
     """Monkey Patch BaseServer.handle_error to not write
     a stacktrace to stderr on broken pipe.

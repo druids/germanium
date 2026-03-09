@@ -4,7 +4,15 @@ from django.db import connections
 from django.test.utils import get_unique_databases_and_mirrors
 
 
-def setup_databases(verbosity, interactive, keepdb=False, debug_sql=False, parallel=0, aliases=None, **kwargs):
+def setup_databases(
+    verbosity,
+    interactive,
+    keepdb=False,
+    debug_sql=False,
+    parallel=0,
+    aliases=None,
+    **kwargs
+):
     """Create the test databases."""
     test_databases, mirrored_aliases = get_unique_databases_and_mirrors(aliases)
 
@@ -23,12 +31,18 @@ def setup_databases(verbosity, interactive, keepdb=False, debug_sql=False, paral
                     verbosity=verbosity,
                     autoclobber=not interactive,
                     keepdb=keepdb,
-                    serialize=connection.settings_dict['TEST'].get('SERIALIZE', True),
+                    serialize=connection.settings_dict["TEST"].get("SERIALIZE", True),
                 )
 
-                test_fixtures = getattr(settings, 'GERMANIUM_GLOBAL_FIXTURES', {}).get(alias, None)
+                test_fixtures = getattr(settings, "GERMANIUM_GLOBAL_FIXTURES", {}).get(
+                    alias, None
+                )
                 if test_fixtures:
-                    call_command('loaddata', *test_fixtures, **{'verbosity': 0, 'database': alias})
+                    call_command(
+                        "loaddata",
+                        *test_fixtures,
+                        **{"verbosity": 0, "database": alias}
+                    )
 
                 if parallel > 1:
                     for index in range(parallel):
@@ -39,12 +53,15 @@ def setup_databases(verbosity, interactive, keepdb=False, debug_sql=False, paral
                         )
             # Configure all other connections as mirrors of the first one
             else:
-                connections[alias].creation.set_as_test_mirror(connections[first_alias].settings_dict)
+                connections[alias].creation.set_as_test_mirror(
+                    connections[first_alias].settings_dict
+                )
 
     # Configure the test mirrors.
     for alias, mirror_alias in mirrored_aliases.items():
         connections[alias].creation.set_as_test_mirror(
-            connections[mirror_alias].settings_dict)
+            connections[mirror_alias].settings_dict
+        )
 
     if debug_sql:
         for alias in connections:

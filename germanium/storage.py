@@ -26,6 +26,7 @@ class InMemoryNode:
     """
     Base class for files and directories.
     """
+
     parent = None
 
     def add_child(self, name, child):
@@ -38,8 +39,9 @@ class InMemoryFile(InMemoryNode, File):
     Stores contents of file and stores reference to parent. File interface is identical
     to ContentFile, except that self.size works even after data has been written to it
     """
-    def __init__(self, content='', parent=None, name=None):
-        #init InMemoryNode
+
+    def __init__(self, content="", parent=None, name=None):
+        # init InMemoryNode
         self.parent = parent
         self.created_at = timezone.now()
         self.last_modified = timezone.now()
@@ -49,12 +51,12 @@ class InMemoryFile(InMemoryNode, File):
         File.__init__(self, stream_class(content), name=name)
 
     def __str__(self):
-        return '<InMemoryFile: %s>' % self.name
+        return "<InMemoryFile: %s>" % self.name
 
     def __bool__(self):
         return True
 
-    def __nonzero__(self):      # Python 2 compatibility
+    def __nonzero__(self):  # Python 2 compatibility
         return type(self).__bool__(self)
 
     @property
@@ -67,12 +69,12 @@ class InMemoryFile(InMemoryNode, File):
 
     def open(self, mode=None):
         self.seek(0)
-        if 'b' in mode:
+        if "b" in mode:
             if not isinstance(self.file, BytesIO):
-                self.file = BytesIO(self.file.getvalue().encode('utf-8'))
+                self.file = BytesIO(self.file.getvalue().encode("utf-8"))
         else:
             if not isinstance(self.file, StringIO):
-                self.file = StringIO(self.file.getvalue().decode('utf-8'))
+                self.file = StringIO(self.file.getvalue().decode("utf-8"))
 
     def close(self):
         pass
@@ -82,6 +84,7 @@ class InMemoryDir(InMemoryNode):
     """
     Stores dictionary of child directories/files and reference to parent.
     """
+
     def __init__(self, dirs=None, files=None, parent=None):
         self.children = {}
         self.parent = parent
@@ -92,25 +95,27 @@ class InMemoryDir(InMemoryNode):
         current = path_bits[0]
         rest = path_bits[1] if len(path_bits) > 1 else None
         if not rest:
-            if current == '.' or current == '':
+            if current == "." or current == "":
                 return self
             if current in self.children.keys():
                 return self.children[current]
             if not create:
                 raise PathDoesNotExist(path)
-            content = b'' if use_bytes else ''
+            content = b"" if use_bytes else ""
             node = InMemoryFile(name=current, content=content)
             self.add_child(current, node)
             return node
         if current in self.children.keys():
-            return self.children[current].resolve(rest, create=create, use_bytes=use_bytes)
+            return self.children[current].resolve(
+                rest, create=create, use_bytes=use_bytes
+            )
         if not create:
             raise PathDoesNotExist(path)
         node = InMemoryDir()
         self.add_child(current, node)
         return self.children[current].resolve(rest, create=create, use_bytes=use_bytes)
 
-    def ls(self, path=''):
+    def ls(self, path=""):
         return list(self.resolve(path).children.keys())
 
     def listdir(self, dir):
@@ -146,7 +151,7 @@ class InMemoryDir(InMemoryNode):
         return f
 
     def save(self, path, content):
-        mode = 'wb' if isinstance(content, bytes) else 'w'
+        mode = "wb" if isinstance(content, bytes) else "w"
         with self.open(path, mode) as f:
             f.write(content)
         f.last_modified = timezone.now()
@@ -163,7 +168,7 @@ class TestInMemoryStorage(Storage):
     Django storage class for in-memory filesystem.
     """
 
-    filesystem_name = 'default'
+    filesystem_name = "default"
 
     def __init__(self, base_url=None):
         if base_url is None:
@@ -219,10 +224,10 @@ class TestInMemoryStorage(Storage):
         """
         for fixture_dir in settings.FIXTURE_DIRS:
             fixture_dir = os.path.join(fixture_dir, self.filesystem_name)
-            for (root, dirs, files) in os.walk(fixture_dir):
+            for root, dirs, files in os.walk(fixture_dir):
                 for file in files:
                     full_file_path = os.path.join(root, file)
-                    with open(full_file_path, 'rb') as f:
+                    with open(full_file_path, "rb") as f:
                         self.save(os.path.relpath(full_file_path, fixture_dir), f)
 
 

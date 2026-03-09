@@ -5,14 +5,17 @@ from .trivials import assert_equal, assert_in
 
 def get_full_path(*paths):
     string_paths = (str(path) for path in paths)
-    full_path = '/'.join((path[:-1] if path.endswith('/') else path for path in string_paths))
-    return full_path if full_path.endswith('/') else full_path + '/'
+    full_path = "/".join(
+        (path[:-1] if path.endswith("/") else path for path in string_paths)
+    )
+    return full_path if full_path.endswith("/") else full_path + "/"
 
 
 def build_url(*paths, **querystring_dict):
     return (
-        '{}?{}'.format(get_full_path(*paths), urlencode(querystring_dict))
-        if querystring_dict else get_full_path(*paths)
+        "{}?{}".format(get_full_path(*paths), urlencode(querystring_dict))
+        if querystring_dict
+        else get_full_path(*paths)
     )
 
 
