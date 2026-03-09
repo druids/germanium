@@ -25,16 +25,22 @@ def assert_qs_not_exists(qs, msg=None):
 
 def assert_qs_contains(qs, obj, msg=None):
     assert_equal(
-        set(qs.filter(pk__in=get_pks(obj if isinstance(obj, (set, list, tuple)) else {obj}))),
+        set(
+            qs.filter(
+                pk__in=get_pks(obj if isinstance(obj, (set, list, tuple)) else {obj})
+            )
+        ),
         set(obj) if isinstance(obj, (set, list, tuple)) else {obj},
-        msg
+        msg,
     )
 
 
 def assert_qs_not_contains(qs, obj, msg=None):
     assert_false(
-        qs.filter(pk__in=get_pks(obj if isinstance(obj, (set, list, tuple)) else {obj})).exists(),
-        msg
+        qs.filter(
+            pk__in=get_pks(obj if isinstance(obj, (set, list, tuple)) else {obj})
+        ).exists(),
+        msg,
     )
 
 
@@ -50,7 +56,7 @@ def get_value_from_model_instance(instance, field_name):
         current_field_name, next_field_name = field_name.split(LOOKUP_SEP, 1)
         value = model_instance_getattr(instance, current_field_name)
         if value is None:
-            raise AttributeError('Value cannot be get from instance')
+            raise AttributeError("Value cannot be get from instance")
         return get_value_from_model_instance(value, next_field_name)
     else:
         return model_instance_getattr(instance, field_name)
@@ -61,7 +67,9 @@ def assert_equal_model_fields(instance, refresh_from_db=False, **field_values):
         instance.refresh_from_db()
     for field_name, field_value in field_values.items():
         assert_equal(
-            get_value_from_model_instance(instance, field_name), field_value, 'Invalid value of "{}"'.format(field_name)
+            get_value_from_model_instance(instance, field_name),
+            field_value,
+            'Invalid value of "{}"'.format(field_name),
         )
 
 
@@ -83,17 +91,28 @@ class _AssertNumQueriesContext(CaptureQueriesContext):
             return
         executed = len(self)
         assert_equal(
-            executed, self.num,
-            "%d queries executed, %d expected\nCaptured queries were:\n%s" % (
-                executed, self.num,
-                '\n'.join(
-                    '%d. %s' % (i, query['sql']) for i, query in enumerate(self.captured_queries, start=1)
-                )
-            )
+            executed,
+            self.num,
+            "%d queries executed, %d expected\nCaptured queries were:\n%s"
+            % (
+                executed,
+                self.num,
+                "\n".join(
+                    "%d. %s" % (i, query["sql"])
+                    for i, query in enumerate(self.captured_queries, start=1)
+                ),
+            ),
         )
 
 
-def assert_num_queries(num, func=None, *args, using=DEFAULT_DB_ALIAS, clear_content_type_cache=False, **kwargs):
+def assert_num_queries(
+    num,
+    func=None,
+    *args,
+    using=DEFAULT_DB_ALIAS,
+    clear_content_type_cache=False,
+    **kwargs
+):
     conn = connections[using]
 
     context = _AssertNumQueriesContext(num, conn, clear_content_type_cache)

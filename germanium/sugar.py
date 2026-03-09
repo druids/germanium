@@ -7,10 +7,10 @@ from selenium.webdriver.common.action_chains import ActionChains
 
 class CSSMixin:
 
-    main_wrapper = ''
+    main_wrapper = ""
 
     def css_in(self, selector):
-        return self.css(' '.join((self.main_wrapper, selector)))
+        return self.css(" ".join((self.main_wrapper, selector)))
 
     def css_in_type(self, selector, text):
         self.css_type(self.css_in(selector), text)
@@ -22,9 +22,9 @@ class CSSMixin:
         el.send_keys(text)
 
     def type_with_autocomplete(self, selector_or_element, text):
-        self.type(selector_or_element + ' input', text)
+        self.type(selector_or_element + " input", text)
         time.sleep(0.5)
-        self.click(selector_or_element + ' li.ac-row.active')
+        self.click(selector_or_element + " li.ac-row.active")
 
     def save(self, wait_for_element=None):
         self.css(config.BTN_SAVE).click()
@@ -46,12 +46,12 @@ class CSSMixin:
         return self._get_element_from_selector(selector_or_element).get_attribute(attr)
 
     def close_flash(self, type):
-        selector = ''.join((config.FLASH, type, ' ', config.FLASH_ICON_CLOSE))
+        selector = "".join((config.FLASH, type, " ", config.FLASH_ICON_CLOSE))
         self.driver.wait_element_present(selector)
         self.css(selector).click()
 
     def save_modal_form(self):
-        self.css(' '.join((config.MODAL_DIALOG, config.BTN_SAVE))).click()
+        self.css(" ".join((config.MODAL_DIALOG, config.BTN_SAVE))).click()
 
     def _get_element_from_selector(self, selector_or_el):
         if isinstance(selector_or_el, str):
@@ -60,7 +60,7 @@ class CSSMixin:
 
     def count_elements(self, selector):
         element = self._get_element_from_selector(selector)
-        return len(object.__getattribute__(element, 'elements'))
+        return len(object.__getattribute__(element, "elements"))
 
     @wait
     def wait_for_text(self, selector, text):
@@ -86,7 +86,7 @@ class CSSMixin:
 
     def select(self, selector, val):
         element = self._get_element_from_selector(selector)
-        if element.tag_name == 'input':
+        if element.tag_name == "input":
             self.click(selector + '[value="%s"]' % val)
-        elif element.tag_name == 'select':
+        elif element.tag_name == "select":
             self.click(selector + (' option[value="%s"]' % val))

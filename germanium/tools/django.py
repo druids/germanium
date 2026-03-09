@@ -31,12 +31,12 @@ class CatchCallbacks:
         if self._end_count == None:
             watching_callbacks = self._watching_callbacks[start_count:]
         else:
-            watching_callbacks = self._watching_callbacks[start_count:self._end_count]
+            watching_callbacks = self._watching_callbacks[start_count : self._end_count]
         return [callbacks[-1] for callbacks in watching_callbacks]
 
     def execute(self):
         if self._executed:
-            raise RuntimeError('callback was already executed')
+            raise RuntimeError("callback was already executed")
 
         executed_callbacks = []
         start_count = self._start_count
@@ -50,8 +50,10 @@ class CatchCallbacks:
 
         if executed_callbacks:
             self._set_watching_callback(
-                self._watching_callbacks[:self._start_count]
-                + self._watching_callbacks[self._start_count + len(executed_callbacks):]
+                self._watching_callbacks[: self._start_count]
+                + self._watching_callbacks[
+                    self._start_count + len(executed_callbacks) :
+                ]
             )
 
         return executed_callbacks
@@ -60,8 +62,8 @@ class CatchCallbacks:
 class CommitCallbacks:
 
     def __init__(self, connection):
-        self.pre_commit = CatchCallbacks(connection, 'run_pre_commit')
-        self.on_commit = CatchCallbacks(connection, 'run_on_commit')
+        self.pre_commit = CatchCallbacks(connection, "run_pre_commit")
+        self.on_commit = CatchCallbacks(connection, "run_on_commit")
 
     def end(self):
         self.pre_commit.end()
@@ -84,8 +86,13 @@ class CommitCallbacks:
 
 
 @contextmanager
-def capture_commit_callbacks(*, using=DEFAULT_DB_ALIAS, execute_pre_commit=False,
-                             execute_on_commit=False, execute_on_commit_cascade=False):
+def capture_commit_callbacks(
+    *,
+    using=DEFAULT_DB_ALIAS,
+    execute_pre_commit=False,
+    execute_on_commit=False,
+    execute_on_commit_cascade=False
+):
     callbacks = CommitCallbacks(connections[using])
     try:
         yield callbacks
@@ -101,16 +108,20 @@ def capture_commit_callbacks(*, using=DEFAULT_DB_ALIAS, execute_pre_commit=False
             callbacks.execute_on_commit()
 
 
-def test_call_command(command, *args,  **kwargs):
-    execute_pre_commit = kwargs.pop('execute_pre_commit', True)
-    execute_on_commit = kwargs.pop('execute_on_commit', False)
-    execute_on_commit_cascade = kwargs.pop('execute_on_commit_cascade', False)
-    with capture_commit_callbacks(execute_pre_commit=execute_pre_commit,
-                                  execute_on_commit=execute_on_commit,
-                                  execute_on_commit_cascade=execute_on_commit_cascade):
+def test_call_command(command, *args, **kwargs):
+    execute_pre_commit = kwargs.pop("execute_pre_commit", True)
+    execute_on_commit = kwargs.pop("execute_on_commit", False)
+    execute_on_commit_cascade = kwargs.pop("execute_on_commit_cascade", False)
+    with capture_commit_callbacks(
+        execute_pre_commit=execute_pre_commit,
+        execute_on_commit=execute_on_commit,
+        execute_on_commit_cascade=execute_on_commit_cascade,
+    ):
         stdout_output = StringIO()
         stderr_output = StringIO()
-        call_command(command, stdout=stdout_output, stderr=stderr_output, *args, **kwargs)
+        call_command(
+            command, stdout=stdout_output, stderr=stderr_output, *args, **kwargs
+        )
         stdout_output.seek(0)
         stderr_output.seek(0)
     return stdout_output, stderr_output

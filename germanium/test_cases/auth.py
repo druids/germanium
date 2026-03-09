@@ -1,4 +1,3 @@
-
 class UserProxy:
 
     def __init__(self, username, password, user=None):
