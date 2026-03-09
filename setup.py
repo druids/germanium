@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='django-germanium',
+    name='django_germanium',
     version='2.4.0',
     description='Helpful methods for Python Selenium and REST testing',
     author='Lukas Rychtecky, Lubos Matl',
