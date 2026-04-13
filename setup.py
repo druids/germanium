@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='django_germanium',
-    version='2.5.1',
+    version='2.5.2',
     description='Helpful methods for Python Selenium and REST testing',
     author='Lukas Rychtecky, Lubos Matl',
     author_email='lukas.rychtecky@gmail.com, matllubos@gmail.com',
@@ -16,7 +16,6 @@ setup(
     ],
     install_requires=[
         'django>=2.2',
-        'nose>=1.3.7',
     ],
     extras_require={
         'selenium': ['selenium>=2.37.2', 'PyVirtualDisplay>=0.1.2']
