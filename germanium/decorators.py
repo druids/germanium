@@ -206,7 +206,7 @@ def call_test_method(method, self, data, named_data, use_rollback=False):
     elif named_data and not isinstance(data, NamedTestData):
         named_data = None
 
-    databases = self._databases_names()
+    databases = self._databases_names() if hasattr(self, "_databases_names") else []
     is_data_consumer = getattr(method, "is_data_consumer", False)
     sids = []
     if use_rollback:
